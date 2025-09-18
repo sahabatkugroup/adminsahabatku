@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <title>Sahabatku Delivery — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0077c8;
+      --primary-light: #00CAFF;
+      --primary-dark: #0b4870;
+      --secondary: #4a6fa5;
+      --text-primary: #0b3b5a;
+      --text-secondary: #506273;
+      --background: #ffffff;
+      --card-bg: #ffffff;
+      --border: #c9dbf8;
+      --shadow-light: rgba(74, 144, 226, 0.15);
+      --shadow-strong: rgba(74, 144, 226, 0.3);
+      --success: #2ed573;
+      --danger: #ff4757;
+      --warning: #ff9f43;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      margin: 40px auto;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .login-card:hover {
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 {
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .logo p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    
+    input[type="search"] {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1.5px solid var(--border);
+        background: #f8fbff;
+        outline: none;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="month"],
+    select {
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: #f8fbff;
+      outline: none;
+      font-size: 16px;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    input:focus,
+    select:focus,
+    input[type="search"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 202, 255, 0.2);
+      background: #ffffff;
+    }
+
+    .btn {
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 20px rgba(0, 119, 200, 0.3);
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 10px 25px rgba(0, 119, 200, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .error {
+      background-color: rgba(255, 71, 87, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+
+    .success {
+      background-color: rgba(46, 213, 115, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(46, 213, 115, 0.2);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 24px;
+      }
+      
+      .logo h1 {
+        font-size: 24px;
+      }
+      
+      input[type="email"],
+      input[type="password"] {
+        padding: 14px 16px;
+      }
+    }
+
+    /* Admin Panel Styles */
+    .container {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 16px 20px;
+      display: none;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px 28px;
+      box-shadow: 0 12px 30px var(--shadow-light);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 16px 40px var(--shadow-strong);
+    }
+
+    h2, h3 {
+      margin: 8px 0 16px 0;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    #btnLogout {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(45deg, #ff4b2b, #ff416c);
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    #btnLogout:hover {
+      transform: scale(1.1) rotate(-3deg);
+      box-shadow: 0 6px 25px rgba(255,65,108,0.6);
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      text-shadow: 0 0 5px #fff;
+    }
+
+    #btnLogout:active {
+      transform: scale(0.95) rotate(0deg);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .btnbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn.secondary {
+      background: #f5f7fa;
+      color: var(--text-primary);
+      border: 1.5px solid var(--border);
+      box-shadow: none;
+      font-weight: 600;
+    }
+
+    .btn.secondary:hover {
+      background: #e1e9f8;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn.danger {
+      background: #ff6b6b;
+      color: white;
+      box-shadow: none;
+      font-weight: 700;
+      transition: background 0.3s ease;
+    }
+
+    .btn.danger:hover {
+      background: #e04e4e;
+    }
+
+    .btn.success {
+      background: var(--success);
+      color: white;
+      box-shadow: none;
+      font-weight: 700;
+      transition: background 0.3s ease;
+    }
+
+    .btn.success:hover {
+      background: #25b763;
+    }
+
+    .btn.full {
+      width: 100%;
+    }
+
+    nav.tab {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    nav.tab button {
+      padding: 14px 0;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      cursor: pointer;
+    }
+
+    nav.tab button.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 8px 24px var(--shadow-light);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    .list-v {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      overflow-x: auto;
+      display: block;
+    }
+
+    .admin-table th, .admin-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .admin-table th {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 700;
+    }
+
+    .admin-table tr:hover {
+      background-color: rgba(0, 202, 255, 0.05);
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background-color: rgba(46, 213, 115, 0.2);
+      color: var(--success);
+    }
+
+    .status-inactive {
+      background-color: rgba(255, 71, 87, 0.2);
+      color: var(--danger);
+    }
+    
+    .status-published {
+        background-color: rgba(0, 119, 200, 0.2);
+        color: var(--primary);
+    }
+
+    .mini-btn {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 12px;
+    }
+            /* Modal */
+      .modal {
+        position: fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        background: rgba(0,0,0,0.6);
+        display:flex; align-items:center; justify-content:center;
+        z-index:9999;
+      }
+      .modal.hidden { display:none; }
+      .modal-content {
+        background:#fff;
+        border-radius:12px;
+        padding:20px;
+        width:90%;
+        max-width:600px;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        box-shadow:0 8px 24px rgba(0,0,0,0.3);
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {opacity:0; transform:translateY(-10px);}
+        to {opacity:1; transform:translateY(0);}
+      }
+      /* Nota */
+      .nota-header {
+        display:flex; justify-content:space-between;
+        align-items:flex-start;
+      }
+      .nota-header h2 { margin:0; color:#00c853; }
+      .nota-meta p { margin:2px 0; font-size:14px; }
+      .nota-body { margin:15px 0; }
+      .nota-table {
+        width:100%;
+        border-collapse:collapse;
+      }
+      .nota-table th, .nota-table td {
+        border:1px solid #ddd;
+        padding:6px;
+        font-size:14px;
+        text-align:left;
+      }
+      .nota-table th {
+        background:#f5f5f5;
+      }
+      .nota-summary {
+        text-align:right;
+        font-size:15px;
+      }
+      .nota-summary h3 {
+        margin:8px 0 0;
+        color:#d32f2f;
+      }
+      .nota-footer {
+        text-align:center;
+        margin-top:15px;
+        font-size:13px;
+        color:#555;
+        border-top:1px dashed #aaa;
+        padding-top:8px;
+      }
+      .nota-actions {
+        margin-top:15px;
+        text-align:right;
+      }
+      .btn.primary {
+        background:#00c853;
+        color:#fff;
+      }
+      .btn:hover { opacity:0.9; }
+    /* Mobile responsive */
+    @media (max-width: 1100px) {
+      nav.tab {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 900px) {
+      nav.tab {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .container {
+        padding: 12px 16px;
+      }
+      .admin-table {
+        font-size: 0.9rem;
+      }
+      .admin-table th, .admin-table td {
+        padding: 8px 10px;
+      }
+      .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      nav.tab {
+        grid-template-columns: 1fr;
+      }
+      
+      body {
+        padding: 10px;
+      }
+    }
+
+    .error-message {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container" id="loginContainer">
+    <div class="login-card">
+      <div class="logo">
+        <h1>Sahabatku Delivery</h1>
+        <p>Admin Panel - Masuk ke sistem</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Admin</label>
+          <input type="email" id="email" placeholder="admin@sahabatkudelivery.com" required autocomplete="username">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Masukkan password Anda" required autocomplete="current-password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-full">
+          <span id="btnText">Masuk</span>
+          <span id="btnSpinner" class="loading" style="display: none;"></span>
+        </button>
+      </form>
+      
+      <div id="message" class="message"></div>
+    </div>
+    
+    <div class="footer">
+      &copy; 2025 Sahabatku Delivery • <a href="#">Butuh bantuan?</a>
+    </div>
+  </div>
+
+  <div class="container" id="adminPanel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div>
+          <h2>Admin: <span id="adminUser" style="color:#0b4870;font-weight:800"></span></h2>
+          <div class="small">Manajemen Kurir • Monitoring Nota • Laporan Keuangan</div>
+        </div>
+        <button id="btnLogout" class="btn danger">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <nav class="tab" id="adminTabNav">
+        <button data-tab="dashboardTab" class="active">📊 Dashboard</button>
+        <button data-tab="kurirTab">👥 Kurir</button>
+        <button data-tab="notaTab">📋 Nota</button>
+        <button data-tab="ongkirTab">🚚 Ongkir</button>
+        <button data-tab="testimoniTab">⭐ Testimoni</button>
+        <button data-tab="laporanTab">📈 Laporan</button>
+        <button data-tab="settingsTab">⚙️ Pengaturan</button>
+      </nav>
+    </div>
+
+    <div id="dashboardTab" class="tabContent">
+      <h3>Dashboard Overview</h3>
+      
+      <div class="grid grid-3">
+        <div class="card">
+          <h4>Total Kurir Aktif</h4>
+          <div id="totalKurir" style="font-size:32px;font-weight:800;color:var(--primary)">0</div>
+          <div class="small">Jumlah kurir dengan status aktif</div>
+        </div>
+        
+        <div class="card">
+          <h4>Nota Hari Ini</h4>
+          <div id="notaHariIni" style="font-size:32px;font-weight:800;color:var(--primary)">0</div>
+          <div class="small">Nota dibuat hari ini</div>
+        </div>
+        
+        <div class="card">
+          <h4>Pendapatan Bulan Ini</h4>
+          <div id="pendapatanBulanIni" style="font-size:32px;font-weight:800;color:var(--success)">Rp 0</div>
+          <div class="small">Total dari Ongkir + Tambahan</div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top:20px">
+        <h4>Nota Terbaru</h4>
+        <div id="recentNota" class="list-v"></div>
+      </div>
+    </div>
+
+    <div id="kurirTab" class="tabContent hidden">
+      <h3>Manajemen Data Kurir</h3>
+      
+      <div class="card">
+        <h4>Tambah Kurir Baru</h4>
+        <div class="grid grid-3">
+          <div>
+            <label>Username</label>
+            <input id="newKurirUsername" type="text" placeholder="Nama pengguna kurir">
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="newKurirPassword" type="password" placeholder="Password kurir">
+          </div>
+          <div style="align-self:end">
+            <button id="btnAddKurir" class="btn btn-primary">Tambah Kurir</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h4>Daftar Semua Kurir</h4>
+        <table class="admin-table" aria-label="Daftar Kurir">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Status</th>
+              <th>Jumlah Nota</th>
+              <th>Tanggal Bergabung</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="kurirList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="notaTab" class="tabContent hidden">
+      <h3>Semua Nota System</h3>
+      
+      <div class="card">
+        <div class="grid grid-3">
+          <div>
+            <label>Tanggal Mulai</label>
+            <input id="filterStartDate" type="date">
+          </div>
+          <div>
+            <label>Tanggal Akhir</label>
+            <input id="filterEndDate" type="date">
+          </div>
+          <div>
+            <label>Kurir</label>
+            <select id="filterKurir">
+              <option value="">Semua Kurir</option>
+            </select>
+          </div>
+        </div>
+        <div class="btnbar">
+          <button id="btnFilterNota" class="btn btn-primary">Filter</button>
+          <button id="btnResetFilter" class="btn secondary">Reset</button>
+          <button id="btnExportNota" class="btn secondary">Export CSV</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <table class="admin-table" aria-label="Daftar Nota">
+          <thead>
+            <tr>
+              <th>No Nota</th>
+              <th>Kurir</th>
+              <th>Tanggal</th>
+              <th>Ongkir</th>
+              <th>Tambahan</th>
+              <th>Total</th>
+              <th>Item</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="allNotaList"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div id="notaModal" class="modal hidden">
+      <div class="modal-content nota-card" id="notaArea">
+        <div class="nota-header">
+          <div>
+            <h2>Sahabatku Delivery</h2>
+            <p>Jl. Contoh No. 123, Kota Anda</p>
+            <p>📞 0812-3456-7890</p>
+          </div>
+          <div class="nota-meta">
+            <p><strong>No Nota:</strong> <span id="notaNo"></span></p>
+            <p><strong>Tanggal:</strong> <span id="notaTanggal"></span></p>
+            <p><strong>Kurir:</strong> <span id="notaKurir"></span></p>
+          </div>
+        </div>
+        <hr>
+        <div class="nota-body">
+          <table class="nota-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Harga</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="notaItems"></tbody>
+          </table>
+        </div>
+        <hr>
+        <div class="nota-summary">
+          <p>Ongkir: <span id="notaOngkir"></span></p>
+          <p>Tambahan: <span id="notaTambahan"></span></p>
+          <h3>Total: <span id="notaTotal"></span></h3>
+        </div>
+        <div class="nota-footer">
+          <p>Terima kasih sudah menggunakan layanan kami 🙏</p>
+          <p><em>— Sahabatku Delivery —</em></p>
+        </div>
+        <div class="nota-actions">
+          <button id="btnSaveNota" class="btn primary">💾 Simpan Nota</button>
+          <button id="btnCloseNota" class="btn secondary">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ongkirTab" class="tabContent hidden">
+        <h3>Manajemen Daftar Ongkir</h3>
+        <div class="card">
+            <h4>Tambah Wilayah & Ongkir Baru</h4>
+            <div class="grid grid-3">
+                <div>
+                    <label>Nama Wilayah</label>
+                    <input id="newWilayah" type="text" placeholder="Contoh: Jatibarang Kota">
+                </div>
+                <div>
+                    <label>Tarif Ongkir (Rp)</label>
+                    <input id="newOngkir" type="number" placeholder="Contoh: 6000">
+                </div>
+                <div style="align-self:end">
+                    <button id="btnAddOngkir" class="btn btn-primary">Tambah Ongkir</button>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h4>Daftar Semua Ongkir</h4>
+            <div class="form-group">
+                <input type="search" id="searchOngkir" placeholder="🔍 Cari nama wilayah...">
+            </div>
+            <table class="admin-table" aria-label="Daftar Ongkir">
+                <thead>
+                    <tr>
+                        <th>Wilayah</th>
+                        <th>Ongkir</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="ongkirList"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="testimoniTab" class="tabContent hidden">
+        <h3>Daftar Testimoni Pelanggan</h3>
+        <div class="card">
+            <table class="admin-table" aria-label="Daftar Testimoni">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th>Kecepatan</th>
+                        <th>Sikap Kurir</th>
+                        <th>Komentar</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="testimoniList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="laporanTab" class="tabContent hidden">
+      <h3>Laporan Keuangan</h3>
+      
+      <div class="card">
+        <div class="grid grid-3">
+          <div>
+            <label>Bulan</label>
+            <input id="reportMonth" type="month">
+          </div>
+          <div>
+            <label>Kurir</label>
+            <select id="reportKurir">
+              <option value="">Semua Kurir</option>
+            </select>
+          </div>
+          <div style="align-self:end">
+            <button id="btnGenerateReport" class="btn btn-primary">Buat Laporan</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h4>Ringkasan Laporan</h4>
+        <div id="reportSummary" class="grid grid-4">
+          </div>
+      </div>
+      
+      <div class="card">
+        <h4>Detail Laporan per Hari</h4>
+        <table class="admin-table" aria-label="Detail Laporan">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Jumlah Nota</th>
+              <th>Total Pendapatan</th>
+              <th>Rata-rata per Nota</th>
+              <th>Kurir Aktif</th>
+            </tr>
+          </thead>
+          <tbody id="reportDetails"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="settingsTab" class="tabContent hidden">
+      <h3>Pengaturan Sistem</h3>
+      
+      <div class="card">
+        <h4>Admin Baru</h4>
+        <div class="grid grid-3">
+          <div>
+            <label>Email Admin</label>
+            <input id="newAdminEmail" type="email" placeholder="email@admin.com">
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="newAdminPassword" type="password" placeholder="Password admin">
+          </div>
+          <div style="align-self:end">
+            <button id="btnAddAdmin" class="btn btn-primary">Tambah Admin</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h4>Daftar Admin</h4>
+        <table class="admin-table" aria-label="Daftar Admin">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Tanggal Dibuat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="adminList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getDatabase, 
+      ref, 
+      set, 
+      get, 
+      onValue, 
+      update, 
+      remove, 
+      child 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCtva8TeL40-WotK4kFL_vL8uUXL3GDfww",
+      authDomain: "sahabatkuu-bisa.firebaseapp.com",
+      databaseURL: "https://sahabatkuu-bisa-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sahabatkuu-bisa",
+      storageBucket: "sahabatkuu-bisa.firebasestorage.app",
+      messagingSenderId: "315555564115",
+      appId: "1:315555564115:web:56f46dbceb8c154589d4a6",
+      measurementId: "G-PFGYL96VPS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const SUPER_ADMIN_UID = "kSW4ThusrwhUFCQeTsnPV1VNaR72";
+
+    const el = (id) => document.getElementById(id);
+    const loginContainer = el('loginContainer');
+    const adminPanel = el('adminPanel');
+    const loginForm = el('loginForm');
+    const messageDiv = el('message');
+    const btnText = el('btnText');
+    const btnSpinner = el('btnSpinner');
+    const btnLogout = el('btnLogout');
+
+    const formatRp = n => "Rp " + (n || 0).toLocaleString("id-ID");
+
+    const calculatePendapatanNota = (nota) => {
+        const ongkir = Number(nota.ongkir) || 0;
+        const tambahan = nota.tambahans ? nota.tambahans.reduce((sum, t) => sum + (Number(t.nominal) || 0), 0) : 0;
+        return ongkir + tambahan;
+    };
+
+    function showLoading(loading) {
+      const button = loginForm.querySelector('button');
+      if (loading) {
+        btnText.textContent = 'Memproses...';
+        btnSpinner.style.display = 'inline-block';
+        if (button) button.disabled = true;
+      } else {
+        btnText.textContent = 'Masuk';
+        btnSpinner.style.display = 'none';
+        if (button) button.disabled = false;
+      }
+    }
+
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+      
+      if (type === 'error') {
+        setTimeout(() => {
+          messageDiv.style.display = 'none';
+        }, 5000);
+      }
+    }
+    
+    async function isAdmin(user) {
+        if (!user) return false;
+        if (user.uid === SUPER_ADMIN_UID) return true;
+        
+        const adminRef = ref(db, 'admins/' + user.uid);
+        const adminSnap = await get(adminRef);
+        return adminSnap.exists();
+    }
+
+    async function doAdminLogin(email, password) {
+      showLoading(true);
+      messageDiv.style.display = 'none';
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        if (await isAdmin(user)) {
+          showMessage('Login berhasil! Mengarahkan ke dashboard...', 'success');
+        } else {
+          await signOut(auth);
+          showMessage('Anda tidak memiliki akses admin', 'error');
+        }
+        
+      } catch (error) {
+        console.error("Login error:", error);
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          showMessage('Email atau password salah', 'error');
+        } else if (error.code === 'auth/invalid-email') {
+          showMessage('Format email tidak valid', 'error');
+        } else {
+          showMessage('Terjadi kesalahan saat login: ' + error.message, 'error');
+        }
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function doAdminLogout() {
+      try {
+        await signOut(auth);
+        adminPanel.style.display = 'none';
+        loginContainer.style.display = 'block';
+        loginForm.reset();
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (await isAdmin(user)) {
+        loginContainer.style.display = 'none';
+        adminPanel.style.display = 'block';
+        el('adminUser').textContent = user.email;
+        loadDashboard();
+      } else {
+        adminPanel.style.display = 'none';
+        loginContainer.style.display = 'block';
+      }
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = el('email').value.trim();
+      const password = el('password').value;
+      if (!email || !password) {
+        showMessage('Email dan password harus diisi', 'error');
+        return;
+      }
+      doAdminLogin(email, password);
+    });
+
+    btnLogout.addEventListener('click', doAdminLogout);
+
+    function setActiveTab(id) {
+      document.querySelectorAll('nav#adminTabNav button').forEach(button => {
+        button.classList.toggle('active', button.dataset.tab === id);
+      });
+      
+      document.querySelectorAll('.tabContent').forEach(tab => {
+        tab.classList.toggle('hidden', tab.id !== id);
+      });
+      
+      if (id === 'dashboardTab') loadDashboard();
+      if (id === 'kurirTab') loadKurirData();
+      if (id === 'notaTab') loadAllNota();
+      if (id === 'ongkirTab') loadOngkirData();
+      if (id === 'testimoniTab') loadTestimoniData();
+      if (id === 'laporanTab') initReportTab();
+      if (id === 'settingsTab') loadAdminSettings();
+    }
+
+    document.querySelectorAll('nav#adminTabNav button').forEach(button => {
+      button.addEventListener('click', () => setActiveTab(button.dataset.tab));
+    });
+
+    async function loadDashboard() {
+      try {
+        const [kurirSnap, allNotaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
+        
+        let totalKurirAktif = 0;
+        if (kurirSnap.exists()) {
+            const kurirData = kurirSnap.val();
+            totalKurirAktif = Object.values(kurirData).filter(k => k.enabled === true).length;
+        }
+        el('totalKurir').textContent = totalKurirAktif;
+        
+        if (!allNotaSnap.exists()) {
+            el('notaHariIni').textContent = 0;
+            el('pendapatanBulanIni').textContent = formatRp(0);
+            el('recentNota').innerHTML = '<p class="small">Tidak ada nota terbaru</p>';
+            return;
+        }
+
+        const today = new Date().toISOString().slice(0, 10);
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        let notaHariIni = 0;
+        let totalPendapatan = 0;
+        let recentNota = [];
+        
+        const allNota = allNotaSnap.val();
+        Object.keys(allNota).forEach(kurir => {
+            Object.values(allNota[kurir]).forEach(nota => {
+                if (nota.createdAt) {
+                    if (nota.createdAt.startsWith(today)) notaHariIni++;
+                    if (nota.createdAt.startsWith(currentMonth)) {
+                        totalPendapatan += calculatePendapatanNota(nota);
+                    }
+                }
+                recentNota.push({ ...nota, kurir });
+            });
+        });
+        
+        recentNota.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        el('notaHariIni').textContent = notaHariIni;
+        el('pendapatanBulanIni').textContent = formatRp(totalPendapatan);
+        
+        el('recentNota').innerHTML = recentNota.length > 0 
+          ? recentNota.slice(0, 5).map(nota => `
+            <div class="card" style="padding:12px;">
+              <div><strong>No: ${nota.noNota || '-'}</strong> - ${nota.kurir}</div>
+              <div>${new Date(nota.createdAt).toLocaleString('id-ID')}</div>
+              <div>Total: ${formatRp(nota.total)}</div>
+            </div>
+          `).join('')
+          : '<p class="small">Tidak ada nota terbaru</p>';
+        
+      } catch (error) {
+        console.error("Error loading dashboard:", error);
+      }
+    }
+
+    async function loadKurirData() {
+      try {
+        const [kurirSnap, notaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
+        if (!kurirSnap.exists()) {
+          el('kurirList').innerHTML = '<tr><td colspan="5" class="small">Tidak ada kurir terdaftar</td></tr>';
+          return;
+        }
+        
+        const kurirData = kurirSnap.val();
+        const noteCounts = {};
+        if (notaSnap.exists()) {
+          Object.keys(notaSnap.val()).forEach(kurir => {
+            noteCounts[kurir] = Object.keys(notaSnap.val()[kurir]).length;
+          });
+        }
+        
+        const kurirList = Object.values(kurirData);
+        const html = kurirList.map(kurir => `
+          <tr>
+            <td>${kurir.username}</td>
+            <td><span class="status-badge ${kurir.enabled ? 'status-active' : 'status-inactive'}">${kurir.enabled ? 'Aktif' : 'Nonaktif'}</span></td>
+            <td>${noteCounts[kurir.username] || 0}</td>
+            <td>${kurir.createdAt ? new Date(kurir.createdAt).toLocaleDateString('id-ID') : '-'}</td>
+            <td>
+              <button class="btn secondary mini-btn" onclick="window.app.toggleKurirStatus('${kurir.username}', ${!kurir.enabled})">${kurir.enabled ? 'Nonaktifkan' : 'Aktifkan'}</button>
+              <button class="btn danger mini-btn" onclick="window.app.deleteKurir('${kurir.username}')">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+        
+        el('kurirList').innerHTML = html;
+        const kurirOptions = kurirList.map(k => `<option value="${k.username}">${k.username}</option>`).join('');
+        el('filterKurir').innerHTML = '<option value="">Semua Kurir</option>' + kurirOptions;
+        el('reportKurir').innerHTML = '<option value="">Semua Kurir</option>' + kurirOptions;
+        
+      } catch (error) {
+        console.error("Error loading kurir data:", error);
+      }
+    }
+
+    el('btnAddKurir').addEventListener('click', async () => {
+      const username = el('newKurirUsername').value.trim();
+      const password = el('newKurirPassword').value.trim();
+      if (!username || !password) return alert('Username dan password harus diisi');
+      try {
+        const existing = await get(ref(db, `kurir/${username}`));
+        if (existing.exists()) return alert('Username sudah terdaftar');
+        await set(ref(db, `kurir/${username}`), {
+          username: username,
+          password: password,
+          enabled: true,
+          createdAt: new Date().toISOString()
+        });
+        alert('Kurir berhasil ditambahkan');
+        el('newKurirUsername').value = '';
+        el('newKurirPassword').value = '';
+        loadKurirData();
+      } catch (error) {
+        console.error("Error adding kurir:", error);
+        alert('Gagal menambahkan kurir');
+      }
+    });
+
+    const appFunctions = {
+        toggleKurirStatus: async (username, newStatus) => {
+            try {
+                await update(ref(db, `kurir/${username}`), { enabled: newStatus });
+                alert(`Status kurir ${username} berhasil diubah.`);
+                loadKurirData();
+            } catch (error) {
+                console.error("Error toggling kurir status:", error);
+                alert('Gagal mengubah status kurir');
+            }
+        },
+        deleteKurir: async (username) => {
+            if (!confirm(`Yakin ingin menghapus kurir ${username}? Ini akan menghapus semua nota terkait.`)) return;
+            try {
+                await remove(ref(db, `kurir/${username}`));
+                await remove(ref(db, `nota/${username}`));
+                alert('Kurir berhasil dihapus');
+                loadKurirData();
+            } catch (error) {
+                console.error("Error deleting kurir:", error);
+                alert('Gagal menghapus kurir');
+            }
+        },
+        viewNotaDetail: async (kurir, notaId) => {
+            try {
+                const notaSnap = await get(ref(db, `nota/${kurir}/${notaId}`));
+                if (!notaSnap.exists()) return alert('Nota tidak ditemukan');
+                
+                const nota = notaSnap.val();
+                el("notaNo").textContent = nota.noNota || "-";
+                el("notaTanggal").textContent = new Date(nota.createdAt).toLocaleString('id-ID');
+                el("notaKurir").textContent = kurir;
+                
+                el("notaItems").innerHTML = nota.items ? nota.items.map((item, i) => `
+                  <tr>
+                    <td>${i+1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>${formatRp(item.price)}</td>
+                    <td>${formatRp(item.subtotal)}</td>
+                  </tr>`).join('') : `<tr><td colspan="5" style="text-align:center">Tidak ada item</td></tr>`;
+
+                el("notaOngkir").textContent = formatRp(nota.ongkir);
+                const tambahanText = nota.tambahans ? nota.tambahans.map(t => `${t.type}: ${formatRp(t.nominal)}`).join(", ") : "-";
+                el("notaTambahan").textContent = tambahanText;
+                el("notaTotal").textContent = formatRp(nota.total);
+            
+                el("notaModal").classList.remove("hidden");
+            
+                el("btnSaveNota").onclick = async () => {
+                  const canvas = await html2canvas(el("notaArea"));
+                  const link = document.createElement("a");
+                  link.href = canvas.toDataURL("image/png");
+                  link.download = `nota_${nota.noNota || notaId}.png`;
+                  link.click();
+                };
+            } catch (error) {
+                console.error("Error viewing nota:", error);
+                alert('Gagal memuat detail nota');
+            }
+        },
+        deleteNota: async(kurir, notaId, noNota) => {
+            if (!confirm(`Yakin ingin menghapus nota ${noNota}?`)) return;
+            try {
+                await remove(ref(db, `nota/${kurir}/${notaId}`));
+                alert('Nota berhasil dihapus');
+                loadAllNota();
+            } catch (error) {
+                console.error("Error deleting nota:", error);
+                alert('Gagal menghapus nota');
+            }
+        },
+        deleteAdmin: async (uid, email) => {
+            if (uid === SUPER_ADMIN_UID) return alert('Super Admin tidak bisa dihapus.');
+            if (!confirm(`Yakin ingin menghapus admin ${email}? Pengguna ini tidak akan bisa login lagi.`)) return;
+            try {
+                await remove(ref(db, `admins/${uid}`));
+                alert('Admin berhasil dihapus dari daftar.');
+                loadAdminSettings();
+            } catch (error) {
+                console.error("Error deleting admin:", error);
+                alert('Gagal menghapus admin');
+            }
+        },
+        editOngkir: async (wilayah, currentOngkir) => {
+            const newOngkir = prompt(`Masukkan tarif ongkir baru untuk wilayah "${wilayah}":`, currentOngkir);
+            if (newOngkir && !isNaN(newOngkir)) {
+                try {
+                    const snapshot = await get(ref(db, 'daftar_ongkir'));
+                    if (snapshot.exists()) {
+                        const dbKey = Object.keys(snapshot.val()).find(k => k.replace(/_/g, ' ') === wilayah);
+                        if(dbKey) {
+                            await update(ref(db, `daftar_ongkir/${dbKey}`), { ongkir: Number(newOngkir) });
+                            alert('Ongkir berhasil diperbarui.');
+                            loadOngkirData();
+                        }
+                    }
+                } catch (error) {
+                    alert('Gagal memperbarui ongkir.');
+                    console.error(error);
+                }
+            }
+        },
+        deleteOngkir: async (wilayah) => {
+            if (confirm(`Yakin ingin menghapus wilayah "${wilayah}"?`)) {
+                try {
+                    const snapshot = await get(ref(db, 'daftar_ongkir'));
+                     if (snapshot.exists()) {
+                        const dbKey = Object.keys(snapshot.val()).find(k => k.replace(/_/g, ' ') === wilayah);
+                        if(dbKey) {
+                            await remove(ref(db, `daftar_ongkir/${dbKey}`));
+                            alert('Wilayah berhasil dihapus.');
+                            loadOngkirData();
+                        }
+                    }
+                } catch (error) {
+                    alert('Gagal menghapus wilayah.');
+                    console.error(error);
+                }
+            }
+        },
+        toggleTestimoniStatus: async (id, newStatus) => {
+            try {
+                await update(ref(db, `testimoni/${id}`), { isPublished: newStatus });
+                alert(`Status testimoni berhasil diubah.`);
+                loadTestimoniData();
+            } catch (e) {
+                alert('Gagal mengubah status testimoni.');
+                console.error(e);
+            }
+        }
+    };
+    window.app = appFunctions; 
+    
+    el("btnCloseNota").addEventListener('click', () => el("notaModal").classList.add("hidden"));
+
+    async function loadAllNota(filters = {}) {
+      try {
+        const notaSnap = await get(ref(db, 'nota'));
+        if (!notaSnap.exists()) {
+          el('allNotaList').innerHTML = '<tr><td colspan="8" class="small">Tidak ada nota</td></tr>';
+          return;
+        }
+        
+        let allNota = [];
+        const notaData = notaSnap.val();
+        Object.keys(notaData).forEach(kurir => {
+          Object.keys(notaData[kurir]).forEach(notaId => {
+            allNota.push({ id: notaId, kurir: kurir, ...notaData[kurir][notaId] });
+          });
+        });
+        
+        const filtered = allNota.filter(nota => {
+            const date = nota.createdAt ? nota.createdAt.slice(0, 10) : '';
+            return (!filters.startDate || date >= filters.startDate) &&
+                   (!filters.endDate || date <= filters.endDate) &&
+                   (!filters.kurir || nota.kurir === filters.kurir);
+        });
+
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        const totalTambahan = (tambahans) => {
+            if (!tambahans) return 0;
+            return tambahans.reduce((sum, t) => sum + Number(t.nominal || 0), 0);
+        };
+        
+        el('allNotaList').innerHTML = filtered.length > 0 ? filtered.map(nota => `
+          <tr>
+            <td>${nota.noNota || ''}</td>
+            <td>${nota.kurir || ''}</td>
+            <td>${nota.createdAt ? new Date(nota.createdAt).toLocaleDateString('id-ID') : '-'}</td>
+            <td>${formatRp(nota.ongkir)}</td>
+            <td>${formatRp(totalTambahan(nota.tambahans))}</td>
+            <td>${formatRp(calculatePendapatanNota(nota))}</td>
+            <td>${nota.items ? nota.items.length : 0}</td>
+            <td>
+              <button class="btn secondary mini-btn" onclick="window.app.viewNotaDetail('${nota.kurir}', '${nota.id}')">Lihat</button>
+              <button class="btn danger mini-btn" onclick="window.app.deleteNota('${nota.kurir}', '${nota.id}', '${nota.noNota}')">Hapus</button>
+            </td>
+          </tr>
+        `).join('') : '<tr><td colspan="8" class="small">Tidak ada nota yang sesuai filter</td></tr>';
+        
+      } catch (error) {
+        console.error("Error loading all nota:", error);
+      }
+    }
+
+    el('btnFilterNota').addEventListener('click', () => loadAllNota({
+        startDate: el('filterStartDate').value,
+        endDate: el('filterEndDate').value,
+        kurir: el('filterKurir').value
+    }));
+    el('btnResetFilter').addEventListener('click', () => {
+      el('filterStartDate').value = '';
+      el('filterEndDate').value = '';
+      el('filterKurir').value = '';
+      loadAllNota();
+    });
+
+    el('btnExportNota').addEventListener('click', async () => {
+      try {
+        const notaSnap = await get(ref(db, 'nota'));
+        if (!notaSnap.exists()) return alert('Tidak ada data untuk diekspor');
+        let allNota = [];
+        const notaData = notaSnap.val();
+        Object.keys(notaData).forEach(kurir => {
+            Object.keys(notaData[kurir]).forEach(id => {
+                allNota.push({kurir, ...notaData[kurir][id]});
+            })
+        })
+        let csv = 'No Nota,Kurir,Tanggal,Total,Ongkir,Jumlah Item,Nomor HP\n';
+        allNota.forEach(n => {
+          csv += `"${n.noNota||''}","${n.kurir||''}","${new Date(n.createdAt).toLocaleDateString('id-ID')}","${n.total||0}","${n.ongkir||0}","${n.items?n.items.length:0}","${n.custPhone||''}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `sahabatku_nota_export_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        console.error("Error exporting data:", error);
+        alert('Gagal mengekspor data');
+      }
+    });
+
+    function initReportTab() {
+      const now = new Date();
+      el('reportMonth').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      generateReport();
+    }
+    el('btnGenerateReport').addEventListener('click', generateReport);
+
+    async function generateReport() {
+      const month = el('reportMonth').value;
+      const kurirFilter = el('reportKurir').value;
+      if (!month) return alert('Pilih bulan terlebih dahulu');
+      
+      try {
+        const [notaSnap, kurirSnap] = await Promise.all([get(ref(db, 'nota')), get(ref(db, 'kurir'))]);
+        if (!notaSnap.exists()) {
+          el('reportSummary').innerHTML = '';
+          el('reportDetails').innerHTML = '<tr><td colspan="5" class="small">Tidak ada data</td></tr>';
+          return;
+        }
+
+        const activeKurirUsernames = new Set();
+        if (kurirSnap.exists()) {
+            Object.values(kurirSnap.val()).forEach(kurir => {
+                if (kurir.enabled) {
+                    activeKurirUsernames.add(kurir.username);
+                }
+            });
+        }
+
+        let allNota = [];
+        const notaData = notaSnap.val();
+        Object.keys(notaData).forEach(kurirName => {
+            if (!kurirFilter || kurirName === kurirFilter) {
+                Object.values(notaData[kurirName]).forEach(nota => {
+                    if (nota.createdAt && nota.createdAt.startsWith(month)) {
+                        allNota.push({ kurir: kurirName, ...nota });
+                    }
+                });
+            }
+        });
+
+        const byDate = {};
+        const totalKurirAktifDiLaporan = new Set();
+        let totalPendapatan = 0;
+
+        allNota.forEach(nota => {
+            const date = nota.createdAt.slice(0, 10);
+            if (!byDate[date]) {
+              byDate[date] = { count: 0, total: 0, kurir: new Set() };
+            }
+            byDate[date].count++;
+            
+            const pendapatanNota = calculatePendapatanNota(nota);
+            byDate[date].total += pendapatanNota;
+            totalPendapatan += pendapatanNota;
+
+            if (activeKurirUsernames.has(nota.kurir)) {
+                byDate[date].kurir.add(nota.kurir);
+                totalKurirAktifDiLaporan.add(nota.kurir);
+            }
+        });
+        
+        const totalNota = allNota.length;
+        
+        el('reportSummary').innerHTML = `
+          <div class="card"><h4>Total Nota</h4><div style="font-size:24px;font-weight:800;">${totalNota}</div></div>
+          <div class="card"><h4>Total Pendapatan</h4><div style="font-size:24px;font-weight:800;color:var(--success)">${formatRp(totalPendapatan)}</div></div>
+          <div class="card"><h4>Rata-rata Pendapatan/Nota</h4><div style="font-size:24px;font-weight:800;">${formatRp(totalNota > 0 ? totalPendapatan / totalNota : 0)}</div></div>
+          <div class="card"><h4>Kurir Aktif</h4><div style="font-size:24px;font-weight:800;color:var(--secondary)">${totalKurirAktifDiLaporan.size}</div></div>
+        `;
+        
+        el('reportDetails').innerHTML = Object.keys(byDate).sort().map(date => {
+            const data = byDate[date];
+            return `
+            <tr>
+              <td>${new Date(date).toLocaleDateString('id-ID')}</td>
+              <td>${data.count}</td>
+              <td>${formatRp(data.total)}</td>
+              <td>${formatRp(data.count > 0 ? data.total / data.count : 0)}</td>
+              <td>${data.kurir.size}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" class="small">Tidak ada data</td></tr>';
+        
+      } catch (error) {
+        console.error("Error generating report:", error);
+        alert('Gagal membuat laporan');
+      }
+    }
+
+    async function loadAdminSettings() {
+      try {
+        const adminSnap = await get(ref(db, 'admins'));
+        if (!adminSnap.exists()) {
+          el('adminList').innerHTML = '<tr><td colspan="3" class="small">Tidak ada admin tambahan</td></tr>';
+          return;
+        }
+        
+        const html = Object.keys(adminSnap.val()).map(uid => {
+          const admin = { uid, ...adminSnap.val()[uid] };
+          return `
+          <tr>
+            <td>${admin.email}</td>
+            <td>${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString('id-ID') : '-'}</td>
+            <td>
+              ${uid !== auth.currentUser.uid && uid !== SUPER_ADMIN_UID
+                ? `<button class="btn danger mini-btn" onclick="window.app.deleteAdmin('${uid}', '${admin.email}')">Hapus</button>` 
+                : `<span class="small">${uid === SUPER_ADMIN_UID ? '(Super Admin)' : '(Anda)'}</span>`}
+            </td>
+          </tr>`;
+        }).join('');
+        
+        el('adminList').innerHTML = html || '<tr><td colspan="3" class="small">Tidak ada admin</td></tr>';
+        
+      } catch (error) {
+        console.error("Error loading admin settings:", error);
+      }
+    }
+
+    el('btnAddAdmin').addEventListener('click', async () => {
+      const email = el('newAdminEmail').value.trim();
+      const password = el('newAdminPassword').value.trim();
+      if (!email || !password) return alert('Email dan password harus diisi');
+      
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        await set(ref(db, `admins/${user.uid}`), {
+          email: email,
+          createdAt: new Date().toISOString(),
+          createdBy: auth.currentUser.email
+        });
+        
+        alert('Admin berhasil ditambahkan. Mereka sekarang bisa login.');
+        el('newAdminEmail').value = '';
+        el('newAdminPassword').value = '';
+        loadAdminSettings();
+        
+      } catch (error) {
+        console.error("Error adding admin:", error);
+        if (error.code === 'auth/email-already-in-use') alert('Email sudah terdaftar');
+        else if (error.code === 'auth/weak-password') alert('Password terlalu lemah (minimal 6 karakter)');
+        else alert('Gagal menambahkan admin: ' + error.message);
+      }
+    });
+
+    async function loadOngkirData() {
+        try {
+            const snapshot = await get(ref(db, 'daftar_ongkir'));
+            if (!snapshot.exists()) {
+                el('ongkirList').innerHTML = '<tr><td colspan="3" class="small">Belum ada data ongkir</td></tr>';
+                return;
+            }
+            const data = snapshot.val();
+            const ongkirArray = Object.values(data);
+            ongkirArray.sort((a, b) => a.wilayah.localeCompare(b.wilayah));
+
+            const html = ongkirArray.map(item => `
+                <tr>
+                    <td>${item.wilayah}</td>
+                    <td>${formatRp(item.ongkir)}</td>
+                    <td>
+                        <button class="btn secondary mini-btn" onclick="window.app.editOngkir('${item.wilayah}', ${item.ongkir})">Edit</button>
+                        <button class="btn danger mini-btn" onclick="window.app.deleteOngkir('${item.wilayah}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+            el('ongkirList').innerHTML = html;
+        } catch (error) {
+            console.error("Error loading ongkir data:", error);
+            el('ongkirList').innerHTML = '<tr><td colspan="3" class="small error">Gagal memuat data</td></tr>';
+        }
+    }
+    
+    function filterOngkirTable() {
+        const input = el('searchOngkir');
+        const filter = input.value.toLowerCase();
+        const table = el('ongkirList');
+        const tr = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < tr.length; i++) {
+            const td = tr[i].getElementsByTagName('td')[0];
+            if (td) {
+                const txtValue = td.textContent || td.innerText;
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    el('searchOngkir').addEventListener('keyup', filterOngkirTable);
+
+
+    el('btnAddOngkir').addEventListener('click', async () => {
+        const wilayah = el('newWilayah').value.trim();
+        const ongkir = el('newOngkir').value.trim();
+        if (!wilayah || !ongkir) return alert('Wilayah dan Ongkir harus diisi.');
+        const dbKey = wilayah.replace(/[^a-zA-Z0-9]/g, '_');
+        try {
+            await set(ref(db, `daftar_ongkir/${dbKey}`), { wilayah, ongkir: Number(ongkir) });
+            alert('Data ongkir baru berhasil ditambahkan.');
+            el('newWilayah').value = '';
+            el('newOngkir').value = '';
+            loadOngkirData();
+        } catch (error) {
+            alert('Gagal menambahkan data ongkir.');
+            console.error("Error adding ongkir:", error);
+        }
+    });
+
+    async function loadTestimoniData() {
+        try {
+            const snapshot = await get(ref(db, 'testimoni'));
+            if (!snapshot.exists()) {
+                el('testimoniList').innerHTML = '<tr><td colspan="7" class="small">Belum ada testimoni</td></tr>';
+                return;
+            }
+            const data = snapshot.val();
+            const testimoniArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            testimoniArray.sort((a, b) => b.timestamp - a.timestamp); 
+
+            const html = testimoniArray.map(item => {
+                const isPublished = item.isPublished === true;
+                return `
+                <tr>
+                    <td>${item.fullname || '-'}</td>
+                    <td>${'⭐'.repeat(item.rating)}</td>
+                    <td>
+                        <span class="status-badge ${isPublished ? 'status-published' : 'status-inactive'}">
+                            ${isPublished ? 'Ditampilkan' : 'Disembunyikan'}
+                        </span>
+                    </td>
+                    <td>${item.speed || '-'}</td>
+                    <td>${item.courier || '-'}</td>
+                    <td style="white-space: normal; min-width: 250px;">${item.comments || '-'}</td>
+                    <td>
+                        <button class="btn ${isPublished ? 'secondary' : 'success'} mini-btn" onclick="window.app.toggleTestimoniStatus('${item.id}', ${!isPublished})">
+                            ${isPublished ? 'Sembunyikan' : 'Tampilkan'}
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+            el('testimoniList').innerHTML = html;
+        } catch (error) {
+            console.error("Error loading testimoni:", error);
+            el('testimoniList').innerHTML = '<tr><td colspan="7" class="small error">Gagal memuat data</td></tr>';
+        }
+    }
+
+  </script>
+</body>
+</html>
