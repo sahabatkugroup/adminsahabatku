@@ -15,7 +15,7 @@
     --shadow-strong: rgba(58, 141, 222, 0.25);
     --popup-duration: 5000ms; --transition-speed: 0.3s;
   }
-  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Ubuntu, Arial, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; line-height: 1.6; font-size: 16px; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Ubuntu, Arial, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; -moz-osx-osx-smoothing: grayscale; line-height: 1.6; font-size: 16px; }
   .container { max-width: 1200px; margin: 24px auto; padding: 24px 32px; }
   .card { background: #fff; border-radius: var(--radius); box-shadow: 0 12px 30px var(--shadow-light); padding: 28px 32px; transition: box-shadow var(--transition-speed) ease; position: relative; }
   .card:hover { box-shadow: 0 16px 40px var(--shadow-strong); }
@@ -160,6 +160,13 @@
 </div>
 
 <div id="tab-absensi" class="tab">
+  <div class="search-bar" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+    <select id="kurirDropdown" style="flex-grow: 1; padding: 12px 16px; border: 1.5px solid #cfe5f5; border-radius: 14px; background: #f8fcff; transition: border-color 0.3s ease, box-shadow 0.3s ease; font-weight: 600; color: var(--text);">
+      <option value="">-- Pilih Nama Kurir --</option>
+    </select>
+    <input type="date" id="dateInput" style="flex-grow: 1; padding: 12px 16px; border: 1.5px solid #cfe5f5; border-radius: 14px; background: #f8fcff; transition: border-color 0.3s ease, box-shadow 0.3s ease; font-weight: 600; color: var(--text);">
+    <button class="btn" id="searchBtn">Cari</button>
+  </div>
   <div class="table-wrap">
     <table id="tableAbsensi">
       <thead><tr><th>Tanggal</th><th>Nama Kurir</th><th>Status</th></tr></thead>
@@ -299,30 +306,46 @@
     });
   }
 
-  function renderAbsensi(ym){
+  function renderAbsensi(ym, selectedCourier = '', selectedDate = '') {
     const tbody = document.querySelector('#tableAbsensi tbody');
-    tbody.innerHTML='';
-    if(!jadwalData[ym]) return;
-    jadwalData[ym].forEach(it=>{
-      kurirList.forEach(async k=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${it.tanggal}</td><td>${k}</td>`;
-        let status = (k===it.off)?'Off':'On';
-        const tdS=document.createElement('td');
-        const btn=document.createElement('button');
-        btn.className='btn-mini ' + (status==='On'?'btn-on':'btn-off');
-        btn.textContent=status;
-        btn.onclick=async ()=>{
-          const ymLocal = it.tanggal.slice(0,7);
-          const row = jadwalData[ymLocal].find(r=>r.tanggal===it.tanggal);
-          row.off = (status==='On') ? k : '';
-          row.pengganti = '';
-          await saveFirestoreJadwal(ymLocal);
-        };
-        tdS.appendChild(btn);
-        tr.appendChild(tdS);
-        tbody.appendChild(tr);
+    tbody.innerHTML = '';
+    if (!jadwalData[ym]) return;
+
+    const dataToRender = [];
+    jadwalData[ym].forEach(it => {
+      kurirList.forEach(k => {
+        dataToRender.push({
+          tanggal: it.tanggal,
+          nama: k,
+          status: (k === it.off) ? 'Off' : 'On',
+          isOffDay: (k === it.off)
+        });
       });
+    });
+
+    const filteredData = dataToRender.filter(item => {
+      const matchCourier = selectedCourier ? item.nama === selectedCourier : true;
+      const matchDate = selectedDate ? item.tanggal === selectedDate : true;
+      return matchCourier && matchDate;
+    });
+
+    filteredData.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${item.tanggal}</td><td>${item.nama}</td>`;
+      const tdS = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.className = `btn-mini ${item.status === 'On' ? 'btn-on' : 'btn-off'}`;
+      btn.textContent = item.status;
+      btn.onclick = async () => {
+        const ymLocal = item.tanggal.slice(0, 7);
+        const row = jadwalData[ymLocal].find(r => r.tanggal === item.tanggal);
+        row.off = (item.status === 'On') ? item.nama : '';
+        row.pengganti = '';
+        await saveFirestoreJadwal(ymLocal);
+      };
+      tdS.appendChild(btn);
+      tr.appendChild(tdS);
+      tbody.appendChild(tr);
     });
   }
 
@@ -387,6 +410,17 @@
       tbody.appendChild(tr);
     });
   }
+  
+  function populateCourierDropdown() {
+    const dropdown = document.getElementById('kurirDropdown');
+    dropdown.innerHTML = '<option value="">-- Pilih Nama Kurir --</option>';
+    kurirList.forEach(k => {
+      const option = document.createElement('option');
+      option.value = k;
+      option.textContent = k;
+      dropdown.appendChild(option);
+    });
+  }
 
   function quickSync(){
     const ym=document.getElementById('monthPick').value;
@@ -394,6 +428,7 @@
     renderAbsensi(ym);
     renderRekap(ym);
     renderApproval();
+    populateCourierDropdown();
   }
 
   async function saveFirestoreJadwal(ym){
@@ -502,13 +537,25 @@
     }catch(e){ popupShow(false,'Gagal save: '+e.message); }
   };
   
+  // New event listener for the search button
+  document.getElementById('searchBtn').onclick = () => {
+    const selectedCourier = document.getElementById('kurirDropdown').value;
+    const selectedDate = document.getElementById('dateInput').value;
+    const ym = document.getElementById('monthPick').value;
+    renderAbsensi(ym, selectedCourier, selectedDate);
+  };
+  
   // Init
   const monthPick = document.getElementById('monthPick');
   monthPick.value = new Date().toISOString().slice(0,7);
   listenMasterKurir();
   listenPengajuan();
   listenJadwal(monthPick.value);
-  monthPick.onchange = ()=> listenJadwal(monthPick.value);
+  monthPick.onchange = ()=> {
+    document.getElementById('kurirDropdown').value = '';
+    document.getElementById('dateInput').value = '';
+    listenJadwal(monthPick.value);
+  };
 </script>
 </body>
 </html>
