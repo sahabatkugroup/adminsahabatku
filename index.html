@@ -611,7 +611,7 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
         <div>
-          <h2>Admin: <span id= style="color:#0b4870;font-weight:800"></span></h2>
+          <h2>Admin 👑<span id= style="color:#0b4870;font-weight:800"></span></h2>
           <div class="small">Manajemen Kurir • Monitoring Nota • Laporan Keuangan</div>
         </div>
         <button id="btnLogout" class="btn danger">Logout</button>
@@ -686,6 +686,7 @@
           <thead>
             <tr>
               <th>Username</th>
+              <th>Password</th>
               <th>Status</th>
               <th>Jumlah Nota</th>
               <th>Tanggal Bergabung</th>
@@ -891,6 +892,25 @@
       <h3>Pengaturan Sistem</h3>
       
       <div class="card">
+        <h4>Kirim Pesan Broadcast</h4>
+        <div class="stack">
+          <div>
+            <label for="broadcastRecipient">Penerima Pesan</label>
+            <select id="broadcastRecipient" class="form-control">
+              <option value="all">Semua Kurir</option>
+            </select>
+          </div>
+          <div>
+            <label for="broadcastMessage">Isi Pesan</label>
+            <textarea id="broadcastMessage" rows="4" placeholder="Tulis pesan yang ingin dikirim..."></textarea>
+          </div>
+          <div style="align-self:end">
+            <button id="btnBroadcast" class="btn btn-primary">Kirim Pesan</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
         <h4>Admin Baru</h4>
         <div class="grid grid-3">
           <div>
@@ -922,7 +942,6 @@
       </div>
     </div>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
@@ -1091,8 +1110,8 @@
       if (id === 'ongkirTab') loadOngkirData();
       if (id === 'testimoniTab') loadTestimoniData();
       if (id === 'laporanTab') initReportTab();
-      if (id === 'settingsTab') loadAdminSettings();
-    }
+      if (id === 'settingsTab') loadSettingsTab();
+      }
 
     document.querySelectorAll('nav#adminTabNav button').forEach(button => {
       button.addEventListener('click', () => setActiveTab(button.dataset.tab));
@@ -1175,6 +1194,7 @@
         const html = kurirList.map(kurir => `
           <tr>
             <td>${kurir.username}</td>
+            <td>${kurir.password}</td>
             <td><span class="status-badge ${kurir.enabled ? 'status-active' : 'status-inactive'}">${kurir.enabled ? 'Aktif' : 'Nonaktif'}</span></td>
             <td>${noteCounts[kurir.username] || 0}</td>
             <td>${kurir.createdAt ? new Date(kurir.createdAt).toLocaleDateString('id-ID') : '-'}</td>
@@ -1184,12 +1204,12 @@
             </td>
           </tr>
         `).join('');
-        
+      
         el('kurirList').innerHTML = html;
         const kurirOptions = kurirList.map(k => `<option value="${k.username}">${k.username}</option>`).join('');
         el('filterKurir').innerHTML = '<option value="">Semua Kurir</option>' + kurirOptions;
         el('reportKurir').innerHTML = '<option value="">Semua Kurir</option>' + kurirOptions;
-        
+        el('broadcastRecipient').innerHTML = '<option value="all">Semua Kurir</option>' + kurirOptions;
       } catch (error) {
         console.error("Error loading kurir data:", error);
       }
@@ -1561,7 +1581,10 @@
         console.error("Error loading admin settings:", error);
       }
     }
-
+    async function loadSettingsTab() {
+      loadAdminSettings();
+      loadKurirData();
+    }
     el('btnAddAdmin').addEventListener('click', async () => {
       const email = el('newAdminEmail').value.trim();
       const password = el('newAdminPassword').value.trim();
@@ -1589,7 +1612,46 @@
         else alert('Gagal menambahkan admin: ' + error.message);
       }
     });
-
+    el('btnBroadcast').addEventListener('click', async () => {
+      const recipient = el('broadcastRecipient').value;
+      const message = el('broadcastMessage').value.trim();
+    
+      if (!message) {
+        alert('Pesan tidak boleh kosong.');
+        return;
+      }
+    
+      try {
+        const timestamp = new Date().toISOString();
+        const messageData = {
+          message: message,
+          sender: auth.currentUser.email,
+          timestamp: timestamp,
+          read: false
+        };
+    
+        if (recipient === 'all') {
+          const kurirSnap = await get(ref(db, 'kurir'));
+          if (kurirSnap.exists()) {
+            const kurirList = Object.values(kurirSnap.val());
+            const updates = {};
+            kurirList.forEach(kurir => {
+              updates[`messages/${kurir.username}/${Date.now()}`] = messageData;
+            });
+            await update(ref(db), updates);
+          }
+        } else {
+          await set(ref(db, `messages/${recipient}/${Date.now()}`), messageData);
+        }
+        
+        alert('Pesan berhasil dikirim!');
+        el('broadcastMessage').value = '';
+    
+      } catch (error) {
+        console.error("Error sending broadcast message:", error);
+        alert('Gagal mengirim pesan: ' + error.message);
+      }
+    });
     async function loadOngkirData() {
         try {
             const snapshot = await get(ref(db, 'daftar_ongkir'));
@@ -1694,7 +1756,6 @@
             el('testimoniList').innerHTML = '<tr><td colspan="7" class="small error">Gagal memuat data</td></tr>';
         }
     }
-
   </script>
 </body>
 </html>
