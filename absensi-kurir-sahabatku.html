@@ -671,7 +671,11 @@
                         </td>
                     `;
                 } else {
-                    aksiHtml = `<td>${item.status}</td>`;
+                    aksiHtml = `
+                        <td>
+                            <button class="btn btn-mini danger" onclick="deletePengajuan('${item.id}')">Hapus</button>
+                        </td>
+                    `;
                 }
 
                 tr.innerHTML = `
@@ -686,10 +690,21 @@
         }
 
         window.approvePengajuan = async (id, tanggal, tukarTanggal, asal, pengganti) => {
-            if(!confirm('Yakin ingin menyetujui pengajuan ini?')) return;
-            const ym = tanggal.slice(0,7);
-            const batch = db.batch();
+            if (!asal || asal.trim() === '') {
+                popupShow(false, 'Gagal Approval', 'Nama kurir asal tidak valid.');
+                return; 
+            }
+            
+            const ym = tanggal.slice(0, 7);
+            
+            if (!jadwalData[ym]) {
+                popupShow(false, 'Gagal Approval', 'Jadwal untuk bulan ini belum dimuat. Silakan pilih bulan yang benar di atas.');
+                return;
+            }
 
+            if(!confirm('Yakin ingin menyetujui pengajuan ini?')) return;
+            
+            const batch = db.batch();
             const docPengajuan = PENGAJUAN_COLLECTION.doc(id);
             batch.update(docPengajuan, { status: 'Approved', approvedBy: ADMIN_UID, updated: firebase.firestore.FieldValue.serverTimestamp() });
 
@@ -718,9 +733,22 @@
                 }
             }
             
+            await batch.commit();
             await saveFirestoreJadwal(ym);
             popupShow(true, 'Approval berhasil', 'Tanggal: '+tanggal+' ↔ '+(tukarTanggal || 'Permintaan Off'));
+            await fetchPengajuan();
+            quickSync();
         };
+
+        async function fetchPengajuan() {
+            const snap = await PENGAJUAN_COLLECTION.orderBy('created', 'desc').get();
+            pengajuanCache = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                pengajuanCache.push({ id: doc.id, ...d });
+            });
+            renderApproval();
+        }
 
         window.rejectPengajuan = async (id) => {
             if(!confirm('Yakin ingin MENOLAK pengajuan ini?')) return;
@@ -728,9 +756,23 @@
                 const docRef = PENGAJUAN_COLLECTION.doc(id);
                 await docRef.update({status: 'Rejected', rejectedBy: ADMIN_UID, updated: firebase.firestore.FieldValue.serverTimestamp()});
                 popupShow(false, 'Pengajuan ditolak', 'Pengajuan telah dibatalkan');
+                await fetchPengajuan();
             } catch (e) {
                 console.error("Error rejecting document: ", e);
                 popupShow(false, 'Gagal Menolak', e.message);
+            }
+        };
+
+        window.deletePengajuan = async (id) => {
+            if(!confirm('Yakin ingin MENGHAPUS pengajuan ini? Tindakan ini tidak bisa dibatalkan.')) return;
+            try {
+                const docRef = PENGAJUAN_COLLECTION.doc(id);
+                await docRef.delete();
+                popupShow(true, 'Pengajuan dihapus', 'Pengajuan telah dihapus secara permanen.');
+                await fetchPengajuan();
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                popupShow(false, 'Gagal Menghapus', e.message);
             }
         };
         
