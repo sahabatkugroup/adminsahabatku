@@ -8,149 +8,414 @@
         /* ===== Reset & Root ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --primary: #00CAFF; --primary-dark: #0b3b5a; --bg: #00CAFF;
-            --ok: #43a047; --danger: #e53935; --pending: #f9a825;
-            --text: #1a2e4a; --text-muted: #5a6d8c;
-            --radius: 16px; --shadow-light: rgba(58, 141, 222, 0.15);
-            --shadow-strong: rgba(58, 141, 222, 0.25);
-            --popup-duration: 5000ms; --transition-speed: 0.3s;
+            --primary: #00CAFF;
+            --primary-dark: #0088B3;
+            --bg: #00CAFF;
+            --ok: #10B981;
+            --danger: #EF4444;
+            --pending: #F59E0B;
+            --text: #1F2937;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --radius: 16px;
+            --shadow: rgba(0, 0, 0, 0.06);
+            --shadow-lg: rgba(0, 0, 0, 0.12);
+            --transition-speed: 0.3s;
+            --gradient-primary: linear-gradient(135deg, #00CAFF 0%, #0088B3 100%);
         }
-        body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Ubuntu, Arial, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; line-height: 1.6; font-size: 16px; }
-        .container { max-width: 1200px; margin: 24px auto; padding: 24px 32px; }
-        .card { background: #fff; border-radius: var(--radius); box-shadow: 0 12px 30px var(--shadow-light); padding: 28px 32px; transition: box-shadow var(--transition-speed) ease; position: relative; }
-        .card:hover { box-shadow: 0 16px 40px var(--shadow-strong); }
-        h1 { color: var(--primary-dark); text-align: center; font-weight: 900; font-size: clamp(24px, 4vw, 36px); margin-bottom: 24px; letter-spacing: 0.04em; text-shadow: 0 1px 3px rgba(58, 141, 222, 0.2); }
-        /* Updated styles for the back button */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; 
+            background: linear-gradient(135deg, var(--bg) 0%, #e0f2fe 100%); 
+            color: var(--text); 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+            line-height: 1.6; 
+            font-size: 16px; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px); 
+            border-radius: var(--radius); 
+            box-shadow: 0 8px 32px var(--shadow); 
+            padding: 32px; 
+            margin-bottom: 24px; 
+            position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 { 
+            color: var(--primary-dark); 
+            text-align: center; 
+            font-weight: 800; 
+            font-size: clamp(28px, 4vw, 40px); 
+            margin-bottom: 32px; 
+            letter-spacing: 0.05em; 
+            background: var(--gradient-primary); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-clip: text;
+        }
+        h4 { 
+            color: var(--text); 
+            font-weight: 700; 
+            font-size: 1.375rem; 
+            margin-bottom: 24px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
+        h4::before {
+            content: '🎛️'; 
+            font-size: 1.2em;
+        }
         .btn-kembali {
-            display: flex !important; /* Override the `display: none` */
-            align-items: center;
-            justify-content: center;
             position: absolute;
             top: 24px;
             right: 24px;
-            padding: 12px 18px;
-            border: none;
-            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-kembali::before {
+            content: '←';
+        }
+        .btn-kembali:hover {
             background: var(--primary);
             color: #fff;
+            transform: translateX(-4px);
+            box-shadow: 0 4px 12px rgba(0, 202, 255, 0.3);
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            border: 1px solid transparent;
+            border-radius: var(--radius);
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all var(--transition-speed) ease, transform var(--transition-speed) ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            user-select: none;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
+            user-select: none;
+            background: var(--gradient-primary);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(0, 202, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-kembali:hover, .btn-kembali:focus {
-            filter: brightness(0.9);
-            transform: translateY(-2px);
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn:hover { 
+            background: var(--primary-dark); 
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 8px 20px rgba(0, 202, 255, 0.4); 
+        }
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        .btn.danger { 
+            background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+        }
+        .btn.danger:hover { 
+            background: #DC2626; 
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+        .btn.ghost { 
+            background: transparent; 
+            color: var(--primary); 
+            border-color: var(--primary); 
+            box-shadow: none; 
+        }
+        .btn.ghost:hover { 
+            background: var(--primary); 
+            color: #fff; 
+            box-shadow: 0 4px 14px rgba(0, 202, 255, 0.3); 
+        }
+        .btn.alt { 
+            background: rgba(255, 255, 255, 0.8); 
+            color: var(--text); 
+            border-color: var(--border-color); 
+            box-shadow: none; 
+        }
+        .btn.alt:hover { 
+            background: #F9FAFB; 
+            transform: none; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+        }
+        .btn-mini { 
+            padding: 8px 16px; 
+            font-size: 0.875rem; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            min-width: 80px;
+            transition: all 0.2s ease;
+        }
+        .btn-mini:hover {
+            transform: scale(1.05);
+        }
+        .btn-on { 
+            background: linear-gradient(135deg, var(--ok) 0%, #059669 100%);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+        .btn-off { 
+            background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+        }
+        .btn-pending { 
+            background: linear-gradient(135deg, var(--pending) 0%, #D97706 100%);
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+        }
+        input, select {
+            padding: 14px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.9);
+            transition: all var(--transition-speed) ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
             outline: none;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 0 0 4px rgba(0, 202, 255, 0.2);
+            transform: scale(1.02);
         }
-        .topbar, .admin-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; margin: 12px 0 20px; }
-        .topbar .btn, .admin-bar .btn { padding: 12px 18px; border: none; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 700; cursor: pointer; transition: filter var(--transition-speed) ease, transform var(--transition-speed) ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); user-select: none; }
-        .topbar .btn:hover, .admin-bar .btn:hover, .topbar .btn:focus, .admin-bar .btn:focus { filter: brightness(0.9); transform: translateY(-2px); outline: none; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
-        .topbar .btn.ghost { background: #e8f4fb; color: var(--primary-dark); box-shadow: none; border: 1.5px solid var(--primary); }
-        .topbar .btn.active { background: var(--primary-dark); box-shadow: 0 6px 20px var(--shadow-strong); }
-        .admin-bar .btn.alt { background: #e8f4fb; color: var(--primary-dark); box-shadow: none; border: 1.5px solid var(--primary); }
-        .admin-bar .btn.danger { background: var(--danger); box-shadow: none; }
-        .admin-bar { display: flex; }
-        .tab { display: none; }
+        input[type="month"], input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .topbar, .admin-bar { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            align-items: center; 
+            margin-bottom: 32px; 
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+        .topbar .btn { 
+            flex: 1; 
+            min-width: 120px;
+            text-align: center; 
+            position: relative;
+        }
+        .topbar .btn.active { 
+            background: var(--gradient-primary); 
+            color: #fff; 
+            box-shadow: 0 6px 16px rgba(0, 202, 255, 0.4); 
+            transform: scale(1.05);
+        }
+        .topbar .month-wrap { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-left: auto; 
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 10px;
+        }
+        .tab { display: none; animation: fadeIn 0.4s ease-in; }
         .tab.active { display: block; }
-        .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1.5px solid #d6e4f0; margin-top: 16px; box-shadow: 0 6px 20px rgba(58, 141, 222, 0.05); }
-        table { width: 100%; border-collapse: collapse; font-size: 15px; color: var(--text); min-width: 600px; }
-        thead th { position: sticky; top: 0; background: var(--primary); color: #fff; font-weight: 700; padding: 14px 16px; letter-spacing: 0.03em; z-index: 10; text-align: center; user-select: none; box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.1); }
-        tbody td { padding: 14px 16px; border-bottom: 1.5px solid #d6e4f0; text-align: center; transition: background var(--transition-speed) ease; }
-        tbody tr:hover td { background: #d9eaff; cursor: default; }
-        .badge { display: inline-block; padding: 7px 16px; border-radius: 9999px; font-weight: 700; font-size: 13px; user-select: none; transition: background var(--transition-speed) ease, color var(--transition-speed) ease; white-space: nowrap; }
-        .badge.on { background: #e9f7ef; color: #1b5e20; border: 1.5px solid #cdebd6; }
-        .badge.off { background: #ffebee; color: #b71c1c; border: 1.5px solid #ffcdd2; }
-        .badge.pending { background: #fff8e1; color: #f9a825; border: 1.5px solid #ffe082; }
-        .btn-mini { padding: 8px 14px; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; transition: filter var(--transition-speed) ease, transform var(--transition-speed) ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); user-select: none; font-size: 14px; }
-        .btn-on { background: var(--ok); }
-        .btn-off { background: var(--danger); }
-        .btn-pending { background: var(--pending); }
-        .btn-on:hover, .btn-off:hover, .btn-pending:hover, .btn-on:focus, .btn-off:focus, .btn-pending:focus { filter: brightness(0.9); transform: translateY(-2px); outline: none; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
-        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: saturate(1.2) blur(6px); }
-        .overlay.active { display: flex; }
-        .small { font-size: 13px; color: var(--text-muted); margin-top: 12px; user-select: none; }
-        #popup { position: fixed; top: 14px; right: 14px; width: min(92vw, 340px); background: rgba(255, 255, 255, 0.95); color: var(--text); border: 1.5px solid #d6e4f0; border-left: 6px solid var(--ok); border-radius: 16px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16); padding: 16px 20px; display: none; z-index: 9998; backdrop-filter: saturate(1.2) blur(6px); opacity: 0; transform: translateY(-16px); transition: opacity 0.35s ease, transform 0.35s ease, border-color 0.25s ease; user-select: none; }
-        #popup.show { display: block; opacity: 1; transform: translateY(0); }
-        #popup .title { font-weight: 800; margin-bottom: 6px; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--primary-dark); }
-        #popup .meta { font-size: 13px; color: var(--text-muted); }
-        select { padding: 12px 16px; border: 1.5px solid #cfe5f5; border-radius: 14px; min-width: 220px; background: #f8fcff; cursor: pointer; transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease; font-weight: 600; color: var(--text); user-select: none; }
-        select:hover, select:focus { border-color: var(--primary); box-shadow: 0 6px 18px rgba(58, 141, 222, 0.25); outline: none; }
-        #pengajuanForm { display: none; }
-        #pengajuanForm select { min-width: 200px; padding: 12px 16px; border-radius: 14px; border: 1.5px solid #cfe5f5; background: white; font-weight: 600; color: var(--text); transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease; }
-        #pengajuanForm select:hover, #pengajuanForm select:focus { border-color: var(--primary); box-shadow: 0 6px 18px rgba(58, 141, 222, 0.25); outline: none; }
-        #pengajuanForm button { background: var(--primary); border-radius: 14px; padding: 12px 20px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; transition: filter var(--transition-speed) ease, transform var(--transition-speed) ease; user-select: none; border: none; box-shadow: 0 6px 20px rgba(58, 141, 222, 0.2); }
-        #pengajuanForm button:hover, #pengajuanForm button:focus { filter: brightness(0.9); transform: translateY(-2px); outline: none; box-shadow: 8px 24px rgba(58, 141, 222, 0.3); }
-        #btn-logout, #btn-kembali { display: flex; }
-        .modal { background: #fff; width: min(92vw, 460px); border-radius: 20px; box-shadow: 0 12px 30px var(--shadow-light); padding: 28px 32px; text-align: center; user-select: none; }
-        .modal h3 { color: var(--primary-dark); margin-bottom: 20px; font-weight: 800; font-size: 1.5rem; letter-spacing: 0.03em; }
-        .modal select { width: 100%; margin: 12px 0; }
-        .modal .btn { width: 100%; padding: 14px 0; border: none; border-radius: 14px; background: var(--danger); color: #fff; font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: background var(--transition-speed) ease, box-shadow var(--transition-speed) ease; user-select: none; }
-        .modal .btn:hover, .modal .btn:focus { background: #b71c1c; box-shadow: 0 8px 24px var(--shadow-strong); outline: none; }
-        .modal .btn.cancel { background: #e8f4fb; color: var(--primary-dark); margin-top: 10px; }
-        @media (max-width: 900px) {
-            .container { padding: 16px 20px; }
-            #pengajuanForm { flex-direction: column; gap: 16px; }
-            .topbar, .admin-bar { justify-content: flex-start; }
-            .topbar .btn, .admin-bar .btn { flex: 1 1 100%; }
-            table { font-size: 14px; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        @media (max-width: 600px) {
-            .container { padding: 16px 16px; }
-            h1 { font-size: clamp(20px, 7vw, 28px); margin-bottom: 16px; }
-            /* Adjust button position for smaller screens */
-            .btn-kembali {
-                top: 14px;
-                right: 14px;
-                padding: 10px 14px;
-                font-size: 14px;
-            }
-            #pengajuanForm { flex-direction: column; gap: 16px; padding: 16px 16px; }
-            #pengajuanForm select, #pengajuanForm button { min-width: 100% !important; width: 100% !important; }
-            .topbar, .admin-bar { justify-content: flex-start; gap: 12px; }
-            .topbar .btn, .admin-bar .btn { flex: 1 1 100%; width: 100%; }
-            .table-wrap { overflow-x: auto; }
-            table { min-width: 100%; font-size: 13px; }
-            thead th, tbody td { padding: 10px 8px; }
-            .badge { padding: 5px 10px; font-size: 11px; }
-            .btn-mini { padding: 6px 10px; font-size: 12px; }
-            .login { width: 90vw; padding: 20px 20px; }
-            .login input { padding: 10px 12px; font-size: 0.9rem; }
-            .login .btn { padding: 12px 0; font-size: 1rem; }
+        .table-wrap { 
+            overflow-x: auto; 
+            border: 1px solid var(--border-color); 
+            border-radius: var(--radius); 
+            margin-top: 20px; 
+            background: rgba(255, 255, 255, 0.8);
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 15px; 
+            color: var(--text); 
+            min-width: 700px; 
+        }
+        thead th { 
+            background: var(--gradient-primary); 
+            color: #fff; 
+            font-weight: 700; 
+            padding: 16px 18px; 
+            text-align: center; 
+            position: sticky; 
+            top: 0;
+            z-index: 10;
+        }
+        tbody td { 
+            padding: 16px 18px; 
+            border-bottom: 1px solid var(--border-color); 
+            text-align: center; 
+            background: rgba(255, 255, 255, 0.9); 
+            transition: all 0.2s ease;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { 
+            background: rgba(0, 202, 255, 0.1); 
+            transform: scale(1.01);
+        }
+        .badge { 
+            display: inline-block; 
+            padding: 8px 16px; 
+            border-radius: 9999px; 
+            font-weight: 700; 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        .badge:hover {
+            transform: scale(1.05);
+        }
+        .badge.on { 
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); 
+            color: var(--ok); 
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+        .badge.off { 
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%); 
+            color: var(--danger); 
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+        .badge.pending { 
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); 
+            color: var(--pending); 
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+        .small { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 16px; 
+            font-style: italic;
+        }
+        #popup { 
+            position: fixed; 
+            top: 20px; 
+            right: -400px; 
+            width: min(95vw, 380px); 
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            border-left: 6px solid var(--ok); 
+            border-radius: var(--radius); 
+            box-shadow: 0 12px 40px var(--shadow-lg); 
+            padding: 20px 24px; 
+            display: none; 
+            z-index: 9999; 
+            opacity: 0; 
+            transform: translateY(-20px) scale(0.95); 
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            user-select: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #popup.show { 
+            display: block; 
+            right: 20px; 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
+        #popup .title { 
+            font-weight: 800; 
+            font-size: 1.125rem; 
+            color: var(--primary-dark); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        #popup .icon {
+            font-size: 1.5em;
+            animation: bounceIn 0.6s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        #popup .meta { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            line-height: 1.5;
+        }
+        #popup.error { border-left-color: var(--danger); }
+        #popup.pending { border-left-color: var(--pending); }
+        .search-bar {
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 12px; }
+            .topbar, .admin-bar { flex-direction: column; align-items: stretch; }
+            .topbar .month-wrap { margin-left: 0; margin-top: 12px; justify-content: center; }
+            .topbar .btn, .admin-bar .btn { width: 100%; }
+            .card { padding: 20px; }
+            #popup { right: -100%; width: 95vw; }
+            #popup.show { right: 5px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <h1>Jadwal & Absensi Kurir (Admin)</h1>
             <a href="index.html" class="btn-kembali">Kembali</a>
-
+            <h1>Jadwal & Absensi Kurir (Admin)</h1>
+            
             <div class="topbar" id="topbar">
                 <button class="btn active" data-tab="tab-jadwal">Jadwal Off</button>
                 <button class="btn" data-tab="tab-rekap">Rekap & Keaktifan</button>
                 <button class="btn ghost" id="btn-absensi-tab" data-tab="tab-absensi">Absensi Harian</button>
                 <button class="btn ghost" id="btn-approval-tab" data-tab="tab-approval">Approval Kurir</button>
-                <span class="split"></span>
+                <button class="btn ghost" id="btn-settings-tab" data-tab="tab-settings">Pengaturan</button>
                 <div class="month-wrap">
-                    <label for="monthPick"><small>Bulan:</small></label>
+                    <label for="monthPick" style="color: var(--text-muted);">Bulan:</label>
                     <input type="month" id="monthPick"/>
                 </div>
-                <button class="btn" id="btn-logout">Logout</button>
-            </div>
-
-            <div class="admin-bar" id="adminBar">
-                <button class="btn alt" id="btn-save">Save Data (Firestore)</button>
-                <button class="btn" id="btn-add">Tambah Kurir</button>
-                <button class="btn danger" id="btn-del">Hapus Kurir</button>
-                <button class="btn alt" id="btn-regen">Regenerasi Off</button>
             </div>
 
             <div id="tab-jadwal" class="tab active">
-                <div id="pengajuanForm" style="display: none;"></div>
                 <div class="table-wrap">
                     <table id="tableJadwal">
                         <thead><tr><th>Tanggal</th><th>Hari</th><th>Kurir Off</th><th>Pengganti</th></tr></thead>
@@ -161,10 +426,10 @@
 
             <div id="tab-absensi" class="tab">
                 <div class="search-bar" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <select id="kurirDropdown" style="flex-grow: 1; padding: 12px 16px; border: 1.5px solid #cfe5f5; border-radius: 14px; background: #f8fcff; transition: border-color 0.3s ease, box-shadow 0.3s ease; font-weight: 600; color: var(--text);">
+                    <select id="kurirDropdown" style="flex-grow: 1;">
                         <option value="">-- Pilih Nama Kurir --</option>
                     </select>
-                    <input type="date" id="dateInput" style="flex-grow: 1; padding: 12px 16px; border: 1.5px solid #cfe5f5; border-radius: 14px; background: #f8fcff; transition: border-color 0.3s ease, box-shadow 0.3s ease; font-weight: 600; color: var(--text);">
+                    <input type="date" id="dateInput" style="flex-grow: 1;">
                     <button class="btn" id="searchBtn">Cari</button>
                 </div>
                 <div class="table-wrap">
@@ -192,41 +457,69 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="overlay" id="delKurirOverlay">
-        <div class="modal">
-            <h3>Hapus Kurir</h3>
-            <select id="delKurirSelect"></select>
-            <button class="btn danger" id="confirmDel">Hapus</button>
-            <button class="btn alt cancel" id="cancelDel">Batal</button>
+            <div id="tab-settings" class="tab">
+                <div class="card">
+                    <h4>Manajemen Kurir</h4>
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <input type="text" id="addKurirName" placeholder="Nama Kurir Baru" style="flex-grow: 1;">
+                        <button class="btn" id="btn-add-kurir">Tambah Kurir</button>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <select id="delKurirSelect" style="flex-grow: 1;"></select>
+                        <button class="btn danger" id="btn-del-kurir">Hapus Kurir</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h4>Pengaturan Absensi Bulanan</h4>
+                    <div class="table-wrap">
+                        <table id="absensiSettingsTable">
+                            <thead>
+                                <tr>
+                                    <th>Nama Kurir</th>
+                                    <th>Jumlah Hari OFF</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h4>Aksi Jadwal Bulanan</h4>
+                    <button class="btn danger" id="btn-regen">Regenerasi Off</button>
+                    <p class="small">Tindakan ini akan menghapus jadwal OFF yang ada dan membuat yang baru secara acak.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="popup">
-        <div class="title"><span class="icon">✅</span><span id="popTitle">Semua On</span></div>
-        <div class="meta" id="popMeta">–</div>
+        <div class="title"><span class="icon">✅</span><span id="popTitle"></span></div>
+        <div class="meta" id="popMeta"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script>
-        // Seluruh kode JavaScript dari file asli
         const firebaseConfig = {
-            apiKey: "AIzaSyD2tC4MlutCuUZvg06yGKT3jveaTGjtZAg",
-            authDomain: "absensikurir.firebaseapp.com",
-            projectId: "absensikurir",
-            storageBucket: "absensikurir.firebasestorage.app",
-            messagingSenderId: "395111603667",
-            appId: "1:395111603667:web:119be647937508d890a326",
-            measurementId: "G-V4L30EH9GP"
+          apiKey: "AIzaSyCtva8TeL40-WotK4kFL_vL8uUXL3GDfww",
+          authDomain: "sahabatkuu-bisa.firebaseapp.com",
+          databaseURL: "https://sahabatkuu-bisa-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "sahabatkuu-bisa",
+          storageBucket: "sahabatkuu-bisa.firebasestorage.app",
+          messagingSenderId: "315555564115",
+          appId: "1:315555564115:web:56f46dbceb8c154589d4a6",
+          measurementId: "G-PFGYL96VPS"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const ADMIN_UID = "J2rOyqBbEVaehucXpJl7jHh90Iz2";
+        const ADMIN_UID = "kSW4ThusrwhUFCQeTsnPV1VNaR72";
 
         const MASTER_DOC = db.collection('appdata').doc('master');
         const JADWAL_COLLECTION = db.collection('jadwal_off');
@@ -245,8 +538,7 @@
 
         function popupShow(ok,title,meta){
             const el=document.getElementById('popup');
-            el.classList.remove('ok','danger','pending');
-            el.classList.add(ok==='pending'?'pending':ok?'ok':'danger');
+            el.style.borderColor = ok === 'pending' ? 'var(--pending)' : ok ? 'var(--ok)' : 'var(--danger)';
             el.querySelector('.icon').textContent=ok==='pending'?'⏳':ok?'✅':'⚠️';
             document.getElementById('popTitle').textContent=title;
             document.getElementById('popMeta').textContent=meta||'';
@@ -374,8 +666,8 @@
                 if(item.status === 'Pending'){
                     aksiHtml = `
                         <td>
-                            <button class="btn-mini btn-on" onclick="approvePengajuan('${item.id}', '${item.tanggal}', '${item.tukarTanggal}', '${item.asal}', '${item.pengganti}')">Approve</button>
-                            <button class="btn-mini btn-off" onclick="rejectPengajuan('${item.id}')" style="margin-left: 6px;">Tolak</button>
+                            <button class="btn btn-mini btn-on" onclick="approvePengajuan('${item.id}', '${item.tanggal}', '${item.tukarTanggal}', '${item.asal}', '${item.pengganti}')">Approve</button>
+                            <button class="btn btn-mini btn-off" onclick="rejectPengajuan('${item.id}')" style="margin-left: 6px;">Tolak</button>
                         </td>
                     `;
                 } else {
@@ -401,7 +693,6 @@
             const docPengajuan = PENGAJUAN_COLLECTION.doc(id);
             batch.update(docPengajuan, { status: 'Approved', approvedBy: ADMIN_UID, updated: firebase.firestore.FieldValue.serverTimestamp() });
 
-            // Cek apakah ini pengajuan tukar off atau off baru
             if (tukarTanggal && tukarTanggal !== 'Tidak Ada') {
                 const row = jadwalData[ym].find(it => it.tanggal === tanggal);
                 const swapRow = jadwalData[ym].find(it => it.tanggal === tukarTanggal);
@@ -417,7 +708,6 @@
                     return;
                 }
             } else {
-                // Ini adalah pengajuan off baru, ganti status hari ini menjadi OFF
                 const row = jadwalData[ym].find(it => it.tanggal === tanggal);
                 if (row) {
                     row.off = asal;
@@ -454,6 +744,104 @@
                 dropdown.appendChild(option);
             });
         }
+        
+        function populateDelKurirDropdown(){
+            const dropdown = document.getElementById('delKurirSelect');
+            dropdown.innerHTML = '<option value="">-- Pilih Kurir --</option>';
+            kurirList.forEach(k => {
+                const option = document.createElement('option');
+                option.value = k;
+                option.textContent = k;
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function renderAbsensiSettingsTable() {
+            const tbody = document.querySelector('#absensiSettingsTable tbody');
+            tbody.innerHTML = '';
+            
+            const ym = document.getElementById('monthPick').value;
+            if (!jadwalData[ym]) return;
+            
+            const offCounts = {};
+            jadwalData[ym].forEach(it => {
+                if (it.off && it.off !== '') {
+                    offCounts[it.off] = (offCounts[it.off] || 0) + 1;
+                }
+            });
+
+            kurirList.forEach(kurir => {
+                const currentOffCount = offCounts[kurir] || 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${kurir}</td>
+                    <td>
+                        <select class="off-count-select" data-original-value="${currentOffCount}">
+                            ${Array.from({length: 10}, (_, i) => `<option value="${i}" ${i === currentOffCount ? 'selected' : ''}>${i}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-mini" style="display: none;" onclick="saveAbsensiSetting(this, '${kurir}')">Simpan</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            tbody.querySelectorAll('.off-count-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const originalValue = e.target.getAttribute('data-original-value');
+                    const currentValue = e.target.value;
+                    const saveBtn = e.target.closest('tr').querySelector('.btn-mini');
+                    if (originalValue !== currentValue) {
+                        saveBtn.style.display = 'inline-block';
+                    } else {
+                        saveBtn.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        window.saveAbsensiSetting = async (button, kurir) => {
+            const ym = document.getElementById('monthPick').value;
+            const row = button.closest('tr');
+            const offCount = parseInt(row.querySelector('.off-count-select').value, 10);
+            
+            if (isNaN(offCount) || offCount < 0) {
+                popupShow(false, 'Gagal', 'Jumlah OFF tidak valid.');
+                return;
+            }
+
+            const confirmSave = confirm(`Yakin ingin mengatur jumlah OFF untuk ${kurir} menjadi ${offCount} hari?`);
+            if (!confirmSave) {
+                row.querySelector('.off-count-select').value = row.querySelector('.off-count-select').getAttribute('data-original-value');
+                button.style.display = 'none';
+                return;
+            }
+
+            const currentJadwal = jadwalData[ym];
+            
+            currentJadwal.forEach(day => {
+                if (day.off === kurir) {
+                    day.off = '';
+                }
+            });
+            
+            const availableSlots = currentJadwal.filter(day => day.off === '');
+            
+            let assignedCount = 0;
+            for (let i = 0; i < availableSlots.length && assignedCount < offCount; i++) {
+                availableSlots[i].off = kurir;
+                assignedCount++;
+            }
+
+            if (assignedCount < offCount) {
+                 popupShow(false, 'Peringatan', `Hanya bisa mengatur ${assignedCount} hari OFF karena keterbatasan slot kosong. Pastikan Anda meregenerasi jadwal jika diperlukan.`);
+            }
+
+            await saveFirestoreJadwal(ym);
+            popupShow(true, 'Pengaturan Tersimpan', `${kurir}: ${assignedCount} hari OFF di bulan ${ym}`);
+            button.style.display = 'none';
+        }
 
         function quickSync(){
             const ym=document.getElementById('monthPick').value;
@@ -462,6 +850,8 @@
             renderRekap(ym);
             renderApproval();
             populateCourierDropdown();
+            populateDelKurirDropdown();
+            renderAbsensiSettingsTable();
         }
 
         async function saveFirestoreJadwal(ym){
@@ -519,69 +909,54 @@
         });
 
         // Admin Actions
-        document.getElementById('btn-add').onclick=async()=>{
-            const nama=prompt('Nama Kurir baru:');
-            if(nama){ kurirList.push(nama.trim()); await saveKurirList(); popupShow(true,'Kurir ditambahkan',nama); }
-        };
-        
-        // Modifikasi Hapus Kurir
-        const delKurirOverlay = document.getElementById('delKurirOverlay');
-        const delKurirSelect = document.getElementById('delKurirSelect');
-
-        document.getElementById('btn-del').onclick = () => {
-            delKurirSelect.innerHTML = '';
-            kurirList.forEach(k => {
-                const opt = document.createElement('option');
-                opt.value = k;
-                opt.textContent = k;
-                delKurirSelect.appendChild(opt);
-            });
-            delKurirOverlay.classList.add('active');
-        };
-
-        document.getElementById('confirmDel').onclick = async () => {
-            const nama = delKurirSelect.value;
-            const idx = kurirList.indexOf(nama);
-            if (idx > -1) {
-                kurirList.splice(idx, 1);
-                await saveKurirList();
-                popupShow(true, 'Kurir dihapus', nama);
+        document.getElementById('btn-regen').onclick = async () => {
+            const confirmRegen = confirm("Apakah Anda yakin ingin melakukan regenerasi jadwal OFF? Tindakan ini akan menghapus jadwal OFF yang ada dan membuat yang baru secara acak.");
+            if (confirmRegen) {
+                const ym = document.getElementById('monthPick').value;
+                if (!ym) return;
+                generateFairOffForMonth(ym);
+                await saveFirestoreJadwal(ym);
+                popupShow(true, 'Regenerasi selesai', ym);
             }
-            delKurirOverlay.classList.remove('active');
         };
 
-        document.getElementById('cancelDel').onclick = () => {
-            delKurirOverlay.classList.remove('active');
+        document.getElementById('btn-add-kurir').onclick = async () => {
+            const nama = document.getElementById('addKurirName').value.trim();
+            if (nama) {
+                if (!kurirList.includes(nama)) {
+                    if (confirm(`Yakin ingin menambahkan kurir baru dengan nama "${nama}"?`)) {
+                        kurirList.push(nama);
+                        await saveKurirList();
+                        popupShow(true, 'Kurir ditambahkan', nama);
+                        document.getElementById('addKurirName').value = '';
+                    }
+                } else {
+                    popupShow(false, 'Gagal', 'Kurir sudah ada.');
+                }
+            } else {
+                popupShow(false, 'Gagal', 'Nama tidak boleh kosong.');
+            }
         };
 
-        document.getElementById('btn-regen').onclick=async()=>{
-            const ym=document.getElementById('monthPick').value;
-            if(!ym) return;
-            generateFairOffForMonth(ym);
-            await saveFirestoreJadwal(ym);
-            popupShow(true,'Regenerasi selesai',ym);
-        };
-        document.getElementById('btn-save').onclick=async()=>{
-            try{
-                await saveKurirList();
-                const ym=document.getElementById('monthPick').value;
-                if(jadwalData[ym]) await saveFirestoreJadwal(ym);
-                popupShow(true,'Data disimpan di Firestore');
-            }catch(e){ popupShow(false,'Gagal save: '+e.message); }
+        document.getElementById('btn-del-kurir').onclick = async () => {
+            const nama = document.getElementById('delKurirSelect').value;
+            if (nama) {
+                if (confirm(`Yakin ingin menghapus kurir "${nama}"?`)) {
+                    const idx = kurirList.indexOf(nama);
+                    if (idx > -1) {
+                        kurirList.splice(idx, 1);
+                        await saveKurirList();
+                        popupShow(true, 'Kurir dihapus', nama);
+                    }
+                }
+            }
         };
         
-        // New event listener for the search button
         document.getElementById('searchBtn').onclick = () => {
             const selectedCourier = document.getElementById('kurirDropdown').value;
             const selectedDate = document.getElementById('dateInput').value;
             const ym = document.getElementById('monthPick').value;
             renderAbsensi(ym, selectedCourier, selectedDate);
-        };
-
-        // Logout
-        document.getElementById('btn-logout').onclick = async () => {
-            await auth.signOut();
-            window.location.href = 'index.html'; // Kembali ke halaman utama setelah logout
         };
         
         // Init
