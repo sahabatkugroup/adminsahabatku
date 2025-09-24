@@ -170,7 +170,23 @@
       border-top-color: #fff;
       animation: spin 1s ease-in-out infinite;
     }
-
+    input[type="search"] {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1.5px solid var(--border);
+        background: #f8fbff;
+        outline: none;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+    
+    input[type="search"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 202, 255, 0.2);
+        background: #ffffff;
+    }
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -379,20 +395,39 @@
     }
 
     .grid {
-      display: grid;
+      display: flex;
+      flex-wrap: wrap;
       gap: 16px;
     }
-
-    .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
+    .grid > * {
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    .grid-2 > * {
+        flex: 1;
+        min-width: 200px;
     }
 
+    .grid-3 > * {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .grid-4 > * {
+      flex: 1;
+      min-width: 180px;
+    }
+    
     .grid-3 {
-      grid-template-columns: repeat(3, 1fr);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
     }
-
     .grid-4 {
-      grid-template-columns: repeat(4, 1fr);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
     }
 
     .section-title {
@@ -572,6 +607,17 @@
       font-size: 14px;
       margin-top: 8px;
     }
+    
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .filter-controls label {
+        margin-bottom: 0;
+    }
+    
   </style>
 </head>
 <body>
@@ -611,7 +657,7 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
         <div>
-          <h2>Admin 👑<span id= style="color:#0b4870;font-weight:800"></span></h2>
+          <h2>Admin 👑<span id="adminUser" style="color:#0b4870;font-weight:800"></span></h2>
           <div class="small">Manajemen Kurir • Monitoring Nota • Laporan Keuangan</div>
         </div>
         <button id="btnLogout" class="btn danger">Logout</button>
@@ -625,6 +671,7 @@
         <button data-tab="notaTab">📋 Nota</button>
         <button data-tab="ongkirTab">🚚 Ongkir</button>
         <button data-tab="testimoniTab">⭐ Testimoni</button>
+        <button data-tab="mitraTab">🏢 Mitra</button>
         <button data-tab="laporanTab">📈 Laporan</button>
         <button onclick="window.location.href='absensi-kurir-sahabatku.html'">✅ Absensi Kurir</button>
         <button data-tab="settingsTab">⚙️ Pengaturan</button>
@@ -843,7 +890,75 @@
             </table>
         </div>
     </div>
+    <div id="mitraTab" class="tabContent hidden">
+      <h3>Manajemen Data Mitra</h3>
+      <div class="card">
+        <h4>Tambah Mitra Baru</h4>
+        <div class="grid grid-4">
+          <div>
+            <label>Nama Mitra</label>
+            <input id="newMitraName" type="text" placeholder="Nama Mitra" required>
+          </div>
+          <div>
+            <label>Alamat</label>
+            <input id="newMitraAddress" type="text" placeholder="Alamat Mitra" required>
+          </div>
+          <div>
+            <label>No HP</label>
+            <input id="newMitraPhone" type="text" placeholder="No HP" required>
+          </div>
+          <div>
+            <label>Target Transaksi</label>
+            <input id="newMitraTarget" type="number" placeholder="Target Transaksi Harian" required>
+          </div>
+        </div>
+        <div class="btnbar">
+          <button id="btnAddMitra" class="btn btn-primary">Tambah Mitra</button>
+        </div>
+      </div>
 
+      <div class="card">
+        <h4>Tambah/Ubah TRX Bulanan Mitra</h4>
+        <div class="grid grid-3">
+          <div>
+            <label for="trxMitraSelect">Pilih Mitra</label>
+            <select id="trxMitraSelect">
+              <option value="">Pilih Mitra...</option>
+            </select>
+          </div>
+          <div>
+            <label for="trxMitraInput">Jumlah TRX</label>
+            <input id="trxMitraInput" type="number" placeholder="Masukkan jumlah TRX">
+          </div>
+          <div style="align-self:end">
+            <button id="btnAddTrxButton" class="btn btn-primary">Set TRX</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Daftar Semua Mitra</h4>
+        <div class="filter-controls" style="margin-bottom: 20px;">
+          <label for="monthFilter">Bulan:</label>
+          <input type="month" id="monthFilter" class="form-control" style="width: auto; display: inline-block;">
+        </div>
+        <div class="form-group">
+          <input type="search" id="searchMitra" placeholder="🔍 Cari nama mitra...">
+        </div>
+        <table class="admin-table" aria-label="Daftar Mitra">
+          <thead>
+            <tr>
+              <th>Nama Mitra</th>
+              <th>Alamat</th>
+              <th>No HP</th>
+              <th>Target Trx</th>
+              <th>TRX Bulan Ini</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="mitraListBody"></tbody>
+        </table>
+      </div>
+    </div>
     <div id="laporanTab" class="tabContent hidden">
       <h3>Laporan Keuangan</h3>
       
@@ -942,7 +1057,7 @@
       </div>
     </div>
   </div>
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
       getAuth, 
@@ -959,7 +1074,8 @@
       onValue, 
       update, 
       remove, 
-      child 
+      push,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -1075,7 +1191,7 @@
         loginContainer.style.display = 'none';
         adminPanel.style.display = 'block';
         el('adminUser').textContent = user.email;
-        loadDashboard();
+        setActiveTab('dashboardTab');
       } else {
         adminPanel.style.display = 'none';
         loginContainer.style.display = 'block';
@@ -1110,13 +1226,248 @@
       if (id === 'ongkirTab') loadOngkirData();
       if (id === 'testimoniTab') loadTestimoniData();
       if (id === 'laporanTab') initReportTab();
-      if (id === 'settingsTab') loadSettingsTab();
+      if (id === 'settingsTab') loadAdminSettings();
+      if (id === 'mitraTab') {
+        el('monthFilter').value = new Date().toISOString().slice(0, 7);
+        loadMitraData();
       }
+    }
 
     document.querySelectorAll('nav#adminTabNav button').forEach(button => {
       button.addEventListener('click', () => setActiveTab(button.dataset.tab));
     });
+    
+    // Mitra Management
+    const newMitraName = el('newMitraName');
+    const newMitraAddress = el('newMitraAddress');
+    const newMitraPhone = el('newMitraPhone');
+    const newMitraTarget = el('newMitraTarget');
+    const btnAddMitra = el('btnAddMitra');
+    const mitraListBody = el('mitraListBody');
+    const monthFilter = el('monthFilter');
+    const trxMitraSelect = el('trxMitraSelect');
+    const trxMitraInput = el('trxMitraInput');
+    const btnAddTrxButton = el('btnAddTrxButton');
+    
+    const addMitra = async () => {
+        const name = newMitraName.value.trim();
+        const address = newMitraAddress.value.trim();
+        const phone = newMitraPhone.value.trim();
+        const target = newMitraTarget.value.trim();
+    
+        if (!name || !address || !phone || !target) {
+            alert('Semua data mitra harus diisi.');
+            return;
+        }
+    
+        if (!confirm(`Tambahkan mitra baru: ${name}?`)) return;
+    
+        try {
+            const newMitraRef = push(ref(db, 'mitra'));
+            
+            await set(newMitraRef, {
+                nama: name,
+                alamat: address,
+                noHp: phone,
+                targetTransaksi: parseInt(target),
+                createdAt: serverTimestamp() 
+            });
+            alert('Mitra berhasil ditambahkan!');
+            newMitraName.value = '';
+            newMitraAddress.value = '';
+            newMitraPhone.value = '';
+            newMitraTarget.value = '';
+            loadMitraData(); 
+        } catch (e) {
+            console.error("Gagal menambahkan mitra:", e);
+            alert('Gagal menambahkan mitra.');
+        }
+    };
+    
+    const setMitraTrx = async () => {
+        const mitraId = trxMitraSelect.value;
+        const trxToSet = parseInt(trxMitraInput.value);
+        const selectedMonth = monthFilter.value;
 
+        if (!mitraId) {
+            alert('Pilih mitra terlebih dahulu.');
+            return;
+        }
+        if (isNaN(trxToSet) || trxToSet < 0) {
+            alert('Jumlah TRX harus berupa angka positif.');
+            return;
+        }
+
+        try {
+            const trxRef = ref(db, `mitra_trx_monthly/${mitraId}/${selectedMonth}`);
+            await set(trxRef, { trx: trxToSet });
+            alert(`Jumlah TRX bulanan untuk mitra berhasil di-set menjadi ${trxToSet}.`);
+            trxMitraInput.value = '';
+            loadMitraData();
+        } catch (e) {
+            console.error("Error setting TRX:", e);
+            alert('Gagal mengubah TRX.');
+        }
+    };
+
+    const deleteMitra = async (mitraId, mitraName) => {
+        if (!confirm(`Yakin ingin menghapus mitra "${mitraName}"? Ini akan menghapus semua data dan riwayat transaksi mitra ini secara permanen.`)) return;
+    
+        try {
+            await remove(ref(db, `mitra/${mitraId}`));
+            await remove(ref(db, `mitra_trx_monthly/${mitraId}`));
+            alert('Mitra berhasil dihapus!');
+            loadMitraData();
+        } catch (e) {
+            console.error("Error deleting mitra: ", e);
+            alert('Gagal menghapus mitra.');
+        }
+    };
+
+    const deleteMitraForMonth = async (mitraId, mitraName) => {
+        const selectedMonth = monthFilter.value;
+        if (!confirm(`Yakin ingin menyembunyikan mitra "${mitraName}" untuk bulan ${selectedMonth}? Mitra akan tetap ada di bulan lainnya.`)) return;
+        
+        try {
+            await set(ref(db, `mitra_status_monthly/${mitraId}/${selectedMonth}`), 'inactive');
+            alert('Mitra berhasil disembunyikan dari daftar bulan ini!');
+            loadMitraData();
+        } catch (e) {
+            console.error("Error hiding mitra for month: ", e);
+            alert('Gagal menyembunyikan mitra.');
+        }
+    };
+    
+    const editMitra = async (mitraId) => {
+        const mitraSnap = await get(ref(db, `mitra/${mitraId}`));
+        if (!mitraSnap.exists()) {
+            alert('Mitra tidak ditemukan!');
+            return;
+        }
+        const data = mitraSnap.val();
+        
+        const newName = prompt("Nama Mitra:", data.nama || "");
+        const newAddress = prompt("Alamat:", data.alamat || "");
+        const newPhone = prompt("No HP:", data.noHp || "");
+        const newTarget = prompt("Target Transaksi:", data.targetTransaksi || 0);
+
+        if (newName === null || newAddress === null || newPhone === null || newTarget === null) return;
+        
+        if (!confirm(`Yakin ingin mengubah data mitra "${data.nama}"?`)) return;
+    
+        try {
+            await update(ref(db, `mitra/${mitraId}`), {
+                nama: newName,
+                alamat: newAddress,
+                noHp: newPhone,
+                targetTransaksi: parseInt(newTarget)
+            });
+            alert('Data mitra berhasil diubah!');
+            loadMitraData();
+        } catch (e) {
+            console.error("Error updating mitra: ", e);
+            alert('Gagal mengubah data mitra.');
+        }
+    };
+    
+     const loadMitraData = () => {
+        const mitraRef = ref(db, 'mitra');
+        onValue(mitraRef, (mitraSnapshot) => {
+            const selectedMonth = monthFilter.value;
+            const trxRef = ref(db, `mitra_trx_monthly`);
+            const statusRef = ref(db, `mitra_status_monthly`);
+            
+            onValue(trxRef, (trxSnapshot) => {
+                onValue(statusRef, (statusSnapshot) => {
+                    try {
+                        mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Memuat data...</td></tr>';
+                        
+                        if (!mitraSnapshot.exists()) {
+                             mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Belum ada mitra.</td></tr>';
+                             trxMitraSelect.innerHTML = `<option value="">Tidak ada mitra</option>`;
+                             return;
+                        }
+    
+                        const mitraArray = [];
+                        mitraSnapshot.forEach((childSnapshot) => {
+                            mitraArray.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                        });
+                        
+                        mitraArray.sort((a, b) => (a.nama || "").localeCompare(b.nama || ""));
+                        
+                        const trxData = trxSnapshot.val() || {};
+                        const statusData = statusSnapshot.val() || {};
+                        
+                        const filteredMitra = mitraArray.filter(mitra => {
+                            const status = statusData[mitra.id]?.[selectedMonth];
+                            return status !== 'inactive';
+                        });
+    
+                        const trxOptionsHtml = mitraArray.map(mitra => `<option value="${mitra.id}">${mitra.nama}</option>`).join('');
+                        trxMitraSelect.innerHTML = `<option value="">Pilih Mitra...</option>${trxOptionsHtml}`;
+                        
+                        if (filteredMitra.length === 0) {
+                            mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Tidak ada mitra aktif di bulan ini.</td></tr>';
+                            return;
+                        }
+    
+                        const html = filteredMitra.map(mitra => {
+                            const currentTrx = trxData[mitra.id]?.[selectedMonth]?.trx || 0;
+                            const namaMitra = mitra.nama || '-';
+    
+                            // Logic untuk Alamat (Google Maps)
+                            const alamatText = mitra.alamat || '-';
+                            const isGoogleMapsLink = alamatText.startsWith('http://') || alamatText.startsWith('https://');
+                            const googleMapsLink = isGoogleMapsLink ? alamatText : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alamatText)}`;
+    
+                            // Logic untuk No HP (WhatsApp)
+                            const cleanNoHp = mitra.noHp ? mitra.noHp.replace(/\D/g, '') : '';
+                            const whatsappLink = cleanNoHp ? `https://wa.me/${cleanNoHp.startsWith('62') ? cleanNoHp : '62' + cleanNoHp}` : '#';
+                            
+                            return `
+                            <tr>
+                                <td>${namaMitra}</td>
+                                <td>${mitra.alamat ? `<a href="${googleMapsLink}" target="_blank">${alamatText}</a>` : '-'}</td>
+                                <td>${mitra.noHp ? `<a href="${whatsappLink}" target="_blank">${mitra.noHp}</a>` : '-'}</td>
+                                <td>${new Intl.NumberFormat('id-ID').format(mitra.targetTransaksi || 0)}</td>
+                                <td>${currentTrx}</td>
+                                <td>
+                                    <button class="btn secondary mini-btn" onclick="window.app.editMitra('${mitra.id}')">Edit</button>
+                                    <button class="btn danger mini-btn" onclick="window.app.deleteMitraForMonth('${mitra.id}', '${namaMitra}')">Sembunyikan</button>
+                                </td>
+                            </tr>`;
+                        }).join('');
+                        mitraListBody.innerHTML = html;
+                    
+                    } catch (error) {
+                        console.error("Error loading mitra data:", error);
+                        mitraListBody.innerHTML = '<tr><td colspan="6" class="small error">Gagal memuat data</td></tr>';
+                    }
+                }, { onlyOnce: true });
+            }, { onlyOnce: true });
+        });
+    };
+    
+    btnAddMitra.addEventListener('click', addMitra);
+    btnAddTrxButton.addEventListener('click', setMitraTrx);
+    monthFilter.addEventListener('change', loadMitraData);
+    
+    const filterMitraTable = () => {
+      const input = el('searchMitra');
+      const filter = input.value.toLowerCase();
+      const table = el('mitraListBody');
+      const tr = table.getElementsByTagName('tr');
+    
+      for (let i = 0; i < tr.length; i++) {
+        const td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+          const txtValue = td.textContent || td.innerText;
+          tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+        }
+      }
+    };
+    el('searchMitra').addEventListener('keyup', filterMitraTable);   
+    
     async function loadDashboard() {
       try {
         const [kurirSnap, allNotaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
@@ -1368,7 +1719,10 @@
                 alert('Gagal mengubah status testimoni.');
                 console.error(e);
             }
-        }
+        },
+        editMitra: editMitra,
+        deleteMitra: deleteMitra,
+        deleteMitraForMonth: deleteMitraForMonth,
     };
     window.app = appFunctions; 
     
@@ -1581,10 +1935,7 @@
         console.error("Error loading admin settings:", error);
       }
     }
-    async function loadSettingsTab() {
-      loadAdminSettings();
-      loadKurirData();
-    }
+    
     el('btnAddAdmin').addEventListener('click', async () => {
       const email = el('newAdminEmail').value.trim();
       const password = el('newAdminPassword').value.trim();
@@ -1756,6 +2107,6 @@
             el('testimoniList').innerHTML = '<tr><td colspan="7" class="small error">Gagal memuat data</td></tr>';
         }
     }
-  </script>
+</script>
 </body>
 </html>
