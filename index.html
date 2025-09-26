@@ -568,7 +568,35 @@
         color:#fff;
       }
       .btn:hover { opacity:0.9; }
-    /* Mobile responsive */
+    /* --- CSS untuk Perbaikan Tampilan Mitra --- */
+    @media (max-width: 768px) {
+        /* Membuat input dan button di grid 3 kolom menjadi full-width di mobile */
+        .grid-3 > div {
+            /* Memastikan setiap div mengambil seluruh lebar di mobile */
+            width: 100%; 
+            margin-bottom: 15px;
+        }
+        
+        /* Memastikan input pencarian mengambil lebar penuh */
+        #trxMitraInputSearch, 
+        #trxMitraInput {
+            width: 100% !important;
+            box-sizing: border-box; 
+        }
+    }
+    
+    /* Style dasar untuk input yang kurang lengkap di HTML Anda */
+    #trxMitraInputSearch, 
+    #trxMitraInput,
+    #searchMitra {
+        /* Asumsi Anda memiliki style .form-control. Jika tidak, pakai style ini */
+        padding: 10px;
+        border: 1px solid var(--border, #ccc);
+        border-radius: 6px;
+        font-size: 16px;
+        line-height: 1.5;
+        /* Tambahkan style jika belum ada */
+    }
     @media (max-width: 1100px) {
       nav.tab {
         grid-template-columns: repeat(4, 1fr);
@@ -921,10 +949,10 @@
         <h4>Tambah/Ubah TRX Bulanan Mitra</h4>
         <div class="grid grid-3">
           <div>
-            <label for="trxMitraSelect">Pilih Mitra</label>
-            <select id="trxMitraSelect">
-              <option value="">Pilih Mitra...</option>
-            </select>
+            <label for="trxMitraInputSearch">Pilih Mitra</label>
+            <input id="trxMitraInputSearch" list="mitraDatalist" type="text" placeholder="Ketik untuk mencari mitra...">
+            <datalist id="mitraDatalist"></datalist>
+            <input type="hidden" id="trxMitraSelect" value=""> 
           </div>
           <div>
             <label for="trxMitraInput">Jumlah TRX</label>
@@ -947,6 +975,7 @@
         <table class="admin-table" aria-label="Daftar Mitra">
           <thead>
             <tr>
+              <th>No</th>
               <th>Nama Mitra</th>
               <th>Alamat</th>
               <th>No HP</th>
@@ -1246,6 +1275,8 @@
     const mitraListBody = el('mitraListBody');
     const monthFilter = el('monthFilter');
     const trxMitraSelect = el('trxMitraSelect');
+    const trxMitraInputSearch = el('trxMitraInputSearch'); // Input Cari
+    const mitraDatalist = el('mitraDatalist'); // Datalist
     const trxMitraInput = el('trxMitraInput');
     const btnAddTrxButton = el('btnAddTrxButton');
     
@@ -1283,7 +1314,19 @@
             alert('Gagal menambahkan mitra.');
         }
     };
-    
+    trxMitraInputSearch.addEventListener('input', () => {
+        const inputVal = trxMitraInputSearch.value;
+        // Cari elemen <option> yang value-nya cocok dengan yang diketik/dipilih user
+        const option = mitraDatalist.querySelector(`option[value="${inputVal}"]`);
+        
+        if (option) {
+            // Jika ada kecocokan di datalist, simpan ID mitra ke hidden input
+            trxMitraSelect.value = option.getAttribute('data-id');
+        } else {
+            // Jika tidak ada kecocokan, reset ID
+            trxMitraSelect.value = '';
+        }
+    });
     const setMitraTrx = async () => {
         const mitraId = trxMitraSelect.value;
         const trxToSet = parseInt(trxMitraInput.value);
@@ -1370,7 +1413,7 @@
         }
     };
     
-     const loadMitraData = () => {
+    const loadMitraData = () => {
         const mitraRef = ref(db, 'mitra');
         onValue(mitraRef, (mitraSnapshot) => {
             const selectedMonth = monthFilter.value;
@@ -1380,11 +1423,14 @@
             onValue(trxRef, (trxSnapshot) => {
                 onValue(statusRef, (statusSnapshot) => {
                     try {
-                        mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Memuat data...</td></tr>';
+                        // KOREKSI SINKRONISASI: Ubah colspan menjadi 7
+                        mitraListBody.innerHTML = '<tr><td colspan="7" class="small">Memuat data...</td></tr>'; 
                         
                         if (!mitraSnapshot.exists()) {
-                             mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Belum ada mitra.</td></tr>';
-                             trxMitraSelect.innerHTML = `<option value="">Tidak ada mitra</option>`;
+                             // KOREKSI SINKRONISASI: Ubah colspan menjadi 7
+                             mitraListBody.innerHTML = '<tr><td colspan="7" class="small">Belum ada mitra.</td></tr>';
+                             mitraDatalist.innerHTML = ``; 
+                             trxMitraSelect.value = ''; 
                              return;
                         }
     
@@ -1398,35 +1444,42 @@
                         const trxData = trxSnapshot.val() || {};
                         const statusData = statusSnapshot.val() || {};
                         
+                        // ISI DATALIST UNTUK PENCARIAN (Gunakan semua mitra, termasuk inactive)
+                        const trxOptionsHtml = mitraArray.map(mitra => 
+                            // Gunakan data-id untuk menyimpan ID mitra
+                            `<option value="${mitra.nama}" data-id="${mitra.id}"></option>`
+                        ).join('');
+                        mitraDatalist.innerHTML = trxOptionsHtml;
+                        
+                        
+                        // Filter mitra yang aktif untuk ditampilkan di tabel
                         const filteredMitra = mitraArray.filter(mitra => {
                             const status = statusData[mitra.id]?.[selectedMonth];
-                            return status !== 'inactive';
+                            return status !== 'inactive'; 
                         });
-    
-                        const trxOptionsHtml = mitraArray.map(mitra => `<option value="${mitra.id}">${mitra.nama}</option>`).join('');
-                        trxMitraSelect.innerHTML = `<option value="">Pilih Mitra...</option>${trxOptionsHtml}`;
                         
                         if (filteredMitra.length === 0) {
-                            mitraListBody.innerHTML = '<tr><td colspan="6" class="small">Tidak ada mitra aktif di bulan ini.</td></tr>';
+                            // KOREKSI SINKRONISASI: Ubah colspan menjadi 7
+                            mitraListBody.innerHTML = '<tr><td colspan="7" class="small">Tidak ada mitra aktif di bulan ini.</td></tr>'; 
                             return;
                         }
     
-                        const html = filteredMitra.map(mitra => {
+                        // ISI TABEL DAFTAR MITRA
+                        const html = filteredMitra.map((mitra, index) => { 
                             const currentTrx = trxData[mitra.id]?.[selectedMonth]?.trx || 0;
                             const namaMitra = mitra.nama || '-';
     
-                            // Logic untuk Alamat (Google Maps)
+                            // Logika Link
                             const alamatText = mitra.alamat || '-';
                             const isGoogleMapsLink = alamatText.startsWith('http://') || alamatText.startsWith('https://');
-                            const googleMapsLink = isGoogleMapsLink ? alamatText : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alamatText)}`;
+                            const googleMapsLink = isGoogleMapsLink ? alamatText : `http://maps.google.com/?q=${encodeURIComponent(alamatText)}`;
     
-                            // Logic untuk No HP (WhatsApp)
                             const cleanNoHp = mitra.noHp ? mitra.noHp.replace(/\D/g, '') : '';
                             const whatsappLink = cleanNoHp ? `https://wa.me/${cleanNoHp.startsWith('62') ? cleanNoHp : '62' + cleanNoHp}` : '#';
                             
                             return `
                             <tr>
-                                <td>${namaMitra}</td>
+                                <td>${index + 1}</td> <td>${namaMitra}</td>
                                 <td>${mitra.alamat ? `<a href="${googleMapsLink}" target="_blank">${alamatText}</a>` : '-'}</td>
                                 <td>${mitra.noHp ? `<a href="${whatsappLink}" target="_blank">${mitra.noHp}</a>` : '-'}</td>
                                 <td>${new Intl.NumberFormat('id-ID').format(mitra.targetTransaksi || 0)}</td>
@@ -1441,33 +1494,58 @@
                     
                     } catch (error) {
                         console.error("Error loading mitra data:", error);
-                        mitraListBody.innerHTML = '<tr><td colspan="6" class="small error">Gagal memuat data</td></tr>';
+                        // KOREKSI SINKRONISASI: Ubah colspan menjadi 7
+                        mitraListBody.innerHTML = '<tr><td colspan="7" class="small error">Gagal memuat data</td></tr>'; 
                     }
                 }, { onlyOnce: true });
             }, { onlyOnce: true });
         });
-    };
-    
+    };    
     btnAddMitra.addEventListener('click', addMitra);
     btnAddTrxButton.addEventListener('click', setMitraTrx);
     monthFilter.addEventListener('change', loadMitraData);
     
     const filterMitraTable = () => {
-      const input = el('searchMitra');
-      const filter = input.value.toLowerCase();
-      const table = el('mitraListBody');
-      const tr = table.getElementsByTagName('tr');
-    
-      for (let i = 0; i < tr.length; i++) {
-        const td = tr[i].getElementsByTagName('td')[0];
-        if (td) {
-          const txtValue = td.textContent || td.innerText;
-          tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+        const input = el('searchMitra');
+        const filter = input.value.toUpperCase(); 
+        const tableBody = el('mitraListBody');
+        const tr = tableBody.getElementsByTagName('tr');
+
+        for (let i = 0; i < tr.length; i++) {
+            const tdNama = tr[i].getElementsByTagName('td')[1]; 
+            const tdAlamat = tr[i].getElementsByTagName('td')[2]; 
+            const tdNoHP = tr[i].getElementsByTagName('td')[3]; 
+
+            // Pastikan ini adalah baris data, bukan baris pesan error/loading
+            if (tdNama) { 
+                let rowMatches = false;
+
+                // Cek di kolom Nama Mitra
+                if (tdNama.textContent.toUpperCase().indexOf(filter) > -1) {
+                    rowMatches = true;
+                } 
+                // Cek di kolom Alamat
+                else if (tdAlamat && tdAlamat.textContent.toUpperCase().indexOf(filter) > -1) {
+                    rowMatches = true;
+                } 
+                // Cek di kolom No HP
+                else if (tdNoHP && tdNoHP.textContent.toUpperCase().indexOf(filter) > -1) {
+                    rowMatches = true;
+                }
+
+                // Tampilkan atau sembunyikan baris
+                if (rowMatches) {
+                    tr[i].style.display = ''; 
+                } else {
+                    tr[i].style.display = 'none'; 
+                }
+            } 
         }
-      }
     };
-    el('searchMitra').addEventListener('keyup', filterMitraTable);   
     
+    // Pastikan event listener ini tetap ada
+    el('searchMitra').addEventListener('keyup', filterMitraTable);
+
     async function loadDashboard() {
       try {
         const [kurirSnap, allNotaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
