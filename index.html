@@ -964,6 +964,39 @@
         </div>
       </div>
       <div class="card">
+        <h4>Riwayat Transaksi Mitra (Cek TRX Kurir)</h4>
+        <p class="small" style="margin-bottom: 15px;">Fitur ini menampilkan log input nota yang terhubung ke mitra, untuk memonitor aktivitas kurir.</p>
+        <div class="btnbar" style="justify-content: flex-start; margin-bottom: 20px;">
+            <button id="btnCekTrxMitra" class="btn btn-primary">Cek Semua TRX Mitra</button>
+        </div>
+        <div id="trxMitraLogArea" class="hidden">
+            <div class="filter-controls" style="margin-bottom: 20px;">
+                <label for="trxLogMonthFilter">Bulan:</label>
+                <input type="month" id="trxLogMonthFilter" class="form-control" style="width: auto; display: inline-block;">
+                <label for="trxLogKurirFilter">Kurir:</label>
+                <select id="trxLogKurirFilter" class="form-control" style="width: auto; display: inline-block;">
+                    <option value="">Semua Kurir</option>
+                </select>
+                <button id="btnFilterTrxLog" class="btn secondary mini-btn">Filter Log</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="admin-table" aria-label="Log Transaksi Mitra">
+                    <thead>
+                        <tr>
+                            <th>Waktu Input</th>
+                            <th>Nama Mitra</th>
+                            <th>TRX Input</th> <th>Kurir Input</th>
+                            <th>Aksi (Hapus)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trxMitraLogList">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 20px;">Tekan 'Cek Semua TRX Mitra' untuk memuat data.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="card">
         <h4>Daftar Semua Mitra</h4>
         <div class="filter-controls" style="margin-bottom: 20px;">
           <label for="monthFilter">Bulan:</label>
@@ -988,6 +1021,7 @@
         </table>
       </div>
     </div>
+    
     <div id="laporanTab" class="tabContent hidden">
       <h3>Laporan Keuangan</h3>
       
@@ -1279,6 +1313,19 @@
     const mitraDatalist = el('mitraDatalist'); // Datalist
     const trxMitraInput = el('trxMitraInput');
     const btnAddTrxButton = el('btnAddTrxButton');
+
+    // Deklarasi Elemen untuk Fitur Baru Cek TRX
+    const btnCekTrxMitra = el('btnCekTrxMitra');
+    const trxMitraLogArea = el('trxMitraLogArea');
+    const trxMitraLogList = el('trxMitraLogList');
+    const trxLogMonthFilter = el('trxLogMonthFilter');
+    const trxLogKurirFilter = el('trxLogKurirFilter');
+    const btnFilterTrxLog = el('btnFilterTrxLog');
+    
+    // Variabel Global untuk Log TRX
+    let allTrxLogData = [];
+    let mitraDataMap = {}; // Untuk menyimpan { mitraId: mitraName }
+    let kurirDataMap = {}; // Untuk menyimpan { kurirId: kurirUsername }
     
     const addMitra = async () => {
         const name = newMitraName.value.trim();
@@ -1327,6 +1374,181 @@
             trxMitraSelect.value = '';
         }
     });
+// --- Logika Baru untuk Fitur Cek TRX Mitra Kurir ---
+
+    const fetchMitraAndKurirData = async () => {
+        // Ambil data Mitra
+        const mitraSnapshot = await get(ref(db, 'mitra'));
+        mitraDataMap = {};
+        mitraSnapshot.forEach(childSnap => {
+            mitraDataMap[childSnap.key] = childSnap.val().nama;
+        });
+
+        // Ambil data Kurir
+        const kurirSnapshot = await get(ref(db, 'kurir'));
+        kurirDataMap = {};
+        let kurirOptionsHtml = '<option value="">Semua Kurir</option>';
+        kurirSnapshot.forEach(childSnap => {
+            const data = childSnap.val();
+            // Asumsi kurirId adalah childSnap.key dan username ada di childSnap.val().username
+            kurirDataMap[childSnap.key] = data.username; 
+            kurirOptionsHtml += `<option value="${childSnap.key}">${data.username}</option>`;
+        });
+        trxLogKurirFilter.innerHTML = kurirOptionsHtml;
+    };
+
+
+    const displayFilteredTrxLog = () => {
+        const selectedMonth = trxLogMonthFilter.value; // Format: YYYY-MM
+        const selectedKurirId = trxLogKurirFilter.value; // Kurir ID
+
+        const filteredData = allTrxLogData.filter(log => {
+            const monthMatch = !selectedMonth || log.monthYear === selectedMonth;
+            const kurirMatch = !selectedKurirId || log.kurirId === selectedKurirId;
+            return monthMatch && kurirMatch;
+        });
+
+        if (filteredData.length === 0) {
+            trxMitraLogList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">Tidak ada transaksi mitra yang ditemukan untuk filter ini.</td></tr>`;
+            return;
+        }
+        const html = filteredData.map(log => `
+            <tr>
+                <td>${log.dateString}</td>
+                
+                <td>${log.mitraName}</td>
+                
+                <td><strong>${log.trxInput || 1} TRX</strong> (Bulan: ${log.bulanTujuan || '-'})</td> 
+                
+                <td>${log.kurirName}</td> 
+                
+                <td>
+                    <button class="btn danger mini-btn" onclick="deleteMitraTrxLog(
+                        '${log.id}', 
+                        ${log.trxInput || 1}, 
+                        '${log.mitraId}', 
+                        '${log.bulanTujuan}',
+                        '${log.mitraName}', // Nama Mitra
+                        '${log.kurirName}'  // Nama Kurir
+                    )">Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        trxMitraLogList.innerHTML = html;
+        
+    }
+window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaMitra, namaKurir) => {
+        
+        // --- PERBAIKAN PESAN KONFIRMASI (CONFIRM) ---
+        // Sekarang menggunakan Nama Mitra dan Nama Kurir
+        if (!confirm(`Yakin ingin menghapus ${trxCount} TRX untuk Mitra ${namaMitra} (Kurir: ${namaKurir})?\nTotal TRX bulanan juga akan dikurangi!`)) {
+            return;
+        }
+        
+        if (!logId || !mitraId || !selectedMonth) {
+            alert("Error: Data log tidak lengkap untuk dihapus.");
+            return;
+        }
+
+        try {
+            // 1. Hapus Log Detail Transaksi (TRX)
+            await remove(ref(db, `mitra_trx_log/${logId}`));
+
+            // 2. Kurangi Total TRX Bulanan
+            const trxRef = ref(db, `mitra_trx_monthly/${mitraId}/${selectedMonth}`);
+            const snap = await get(trxRef);
+            
+            if (snap.exists()) {
+                const currentTrx = snap.val().trx;
+                const newTrx = Math.max(0, currentTrx - trxCount); 
+                
+                if (newTrx === 0) {
+                    await remove(trxRef);
+                } else {
+                    await update(trxRef, { trx: newTrx });
+                }
+            }
+
+            // --- PERBAIKAN PESAN SUKSES AKHIR (ALERT) ---
+            // Sesuai permintaan Anda: "tanggal | Nama Mitra | TRX Input | Kurir Input berhasil dihapus..."
+            alert(
+                `${selectedMonth} | ${namaMitra} | ${trxCount} TRX | ${namaKurir} berhasil dihapus dan dikoreksi.`
+            );
+            // ---------------------------------------------
+
+            // Muat ulang data
+            loadMitraTrxLog(); 
+            
+            if (typeof loadMitraData === 'function') {
+                loadMitraData(); 
+            }
+
+        } catch (error) {
+            console.error("Gagal menghapus log:", error);
+            alert("Gagal menghapus log transaksi: " + error.message);
+        }
+    }
+    const loadMitraTrxLog = async () => {
+        trxMitraLogArea.classList.remove('hidden');
+        trxMitraLogList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Memuat data...</td></tr>';
+
+        // 1. Ambil data Kurir dan Mitra untuk pemetaan ID ke Nama
+        await fetchMitraAndKurirData();
+
+        // 2. Ambil semua Log TRX data DARI PATH BARU
+        try {
+            // >>> UBAH SUMBER DATA DARI 'nota' KE 'mitra_trx_log' <<<
+            const logSnapshot = await get(ref(db, 'mitra_trx_log')); 
+            allTrxLogData = [];
+
+            logSnapshot.forEach(childSnap => {
+                const log = childSnap.val();
+                
+                // Asumsi: Transaksi Mitra diidentifikasi dari log input kurir
+                if (log.mitraId && log.kurirId) {
+                    const logDate = new Date(log.timestamp); 
+                    allTrxLogData.push({
+                        id: childSnap.key,
+                        mitraId: log.mitraId,
+                        kurirId: log.kurirId,
+                        timestamp: log.timestamp, 
+                        // Menggunakan trxCount/trxToAdd dari log kurir sebagai pengganti No Nota/TRX
+                        trxInput: log.trxCount || 1, 
+                        bulanTujuan: log.bulanTujuan || '-', // Bulan yang dituju saat input
+                        
+                        dateString: logDate.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}),
+                        monthYear: logDate.toISOString().slice(0, 7), // YYYY-MM
+                        
+                        // Pemetaan ID ke Nama
+                        mitraName: mitraDataMap[log.mitraId] || 'Mitra Tidak Ditemukan',
+                        kurirName: kurirDataMap[log.kurirId] || 'Kurir Tidak Ditemukan',
+                    });
+                }
+            });
+
+            // Urutkan berdasarkan waktu input terbaru
+            allTrxLogData.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Atur nilai default filter bulan ke bulan saat ini
+            if (!trxLogMonthFilter.value) {
+                trxLogMonthFilter.value = new Date().toISOString().slice(0, 7);
+            }
+
+            // Tampilkan hasil yang sudah difilter
+            displayFilteredTrxLog();
+
+        } catch (e) {
+            console.error("Gagal memuat log TRX mitra:", e);
+            trxMitraLogList.innerHTML = '<tr><td colspan="4" class="small error" style="padding: 20px;">Gagal memuat log transaksi. Cek koneksi database.</td></tr>';
+        }
+    };
+
+    // Event listeners untuk fitur baru
+    btnCekTrxMitra.addEventListener('click', loadMitraTrxLog);
+    btnFilterTrxLog.addEventListener('click', displayFilteredTrxLog);
+    trxLogMonthFilter.addEventListener('change', displayFilteredTrxLog);
+    trxLogKurirFilter.addEventListener('change', displayFilteredTrxLog);
     const setMitraTrx = async () => {
         const mitraId = trxMitraSelect.value;
         const trxToSet = parseInt(trxMitraInput.value);
