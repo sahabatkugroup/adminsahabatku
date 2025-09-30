@@ -992,11 +992,12 @@
             <div class="filter-controls" style="margin-bottom: 20px;">
                 <label for="trxLogMonthFilter">Bulan:</label>
                 <input type="month" id="trxLogMonthFilter" class="form-control" style="width: auto; display: inline-block;">
+                <input type="date" id="trxLogDateFilter" class="input-field" style="width: 150px;">
                 <label for="trxLogKurirFilter">Kurir:</label>
                 <select id="trxLogKurirFilter" class="form-control" style="width: auto; display: inline-block;">
                     <option value="">Semua Kurir</option>
                 </select>
-                <button id="btnFilterTrxLog" class="btn secondary mini-btn">Filter Log</button>
+                <button id="btnFilterTrxLog" class="btn secondary mini-btn">Filter</button>
             </div>
             <div style="overflow-x: auto;">
                 <table class="admin-table" aria-label="Log Transaksi Mitra">
@@ -1338,6 +1339,7 @@
     const trxMitraLogArea = el('trxMitraLogArea');
     const trxMitraLogList = el('trxMitraLogList');
     const trxLogMonthFilter = el('trxLogMonthFilter');
+    const trxLogDateFilter = el('trxLogDateFilter'); // <<< TAMBAH INI
     const trxLogKurirFilter = el('trxLogKurirFilter');
     const btnFilterTrxLog = el('btnFilterTrxLog');
     
@@ -1419,12 +1421,14 @@
 
     const displayFilteredTrxLog = () => {
         const selectedMonth = trxLogMonthFilter.value; // Format: YYYY-MM
+        const selectedDate = trxLogDateFilter.value; // <<< TAMBAH INI (Format: YYYY-MM-DD)
         const selectedKurirId = trxLogKurirFilter.value; // Kurir ID
 
         const filteredData = allTrxLogData.filter(log => {
             const monthMatch = !selectedMonth || log.monthYear === selectedMonth;
+            const dateMatch = !selectedDate || log.dateOnly === selectedDate; // <<< TAMBAH INI
             const kurirMatch = !selectedKurirId || log.kurirId === selectedKurirId;
-            return monthMatch && kurirMatch;
+            return monthMatch && kurirMatch && dateMatch; // <<< UBAH BAGIAN INI
         });
 
         if (filteredData.length === 0) {
@@ -1457,7 +1461,7 @@
         trxMitraLogList.innerHTML = html;
         
     }
-window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaMitra, namaKurir) => {
+    window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaMitra, namaKurir) => {
         
         // --- PERBAIKAN PESAN KONFIRMASI (CONFIRM) ---
         // Sekarang menggunakan Nama Mitra dan Nama Kurir
@@ -1538,7 +1542,8 @@ window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaM
                         
                         dateString: logDate.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}),
                         monthYear: logDate.toISOString().slice(0, 7), // YYYY-MM
-                        
+                        dateOnly: logDate.toISOString().slice(0, 10), // YYYY-MM-DD <<< TAMBAH INI
+
                         // Pemetaan ID ke Nama
                         mitraName: mitraDataMap[log.mitraId] || 'Mitra Tidak Ditemukan',
                         kurirName: kurirDataMap[log.kurirId] || 'Kurir Tidak Ditemukan',
@@ -1553,7 +1558,9 @@ window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaM
             if (!trxLogMonthFilter.value) {
                 trxLogMonthFilter.value = new Date().toISOString().slice(0, 7);
             }
-
+            if (!trxLogDateFilter.value) {
+                trxLogDateFilter.value = ''; 
+            }
             // Tampilkan hasil yang sudah difilter
             displayFilteredTrxLog();
 
@@ -1568,6 +1575,8 @@ window.deleteMitraTrxLog = async (logId, trxCount, mitraId, selectedMonth, namaM
     btnFilterTrxLog.addEventListener('click', displayFilteredTrxLog);
     trxLogMonthFilter.addEventListener('change', displayFilteredTrxLog);
     trxLogKurirFilter.addEventListener('change', displayFilteredTrxLog);
+    trxLogDateFilter.addEventListener('change', displayFilteredTrxLog); // <<< TAMBAH INI
+
     const setMitraTrx = async () => {
         const mitraId = trxMitraSelect.value;
         const trxToSet = parseInt(trxMitraInput.value);
