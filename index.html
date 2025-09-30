@@ -156,7 +156,18 @@
       box-shadow: 0 10px 25px rgba(0, 119, 200, 0.4);
       transform: translateY(-2px);
     }
-
+    .btn-secondary {
+        /* MENGUBAH WARNA MENJADI #00CAFF (Primary) */
+        background-color: var(--primary); 
+        color: white;
+    }
+    .btn-secondary:hover {
+        background-color: #00B1E0; /* Warna biru sedikit lebih gelap saat hover */
+        
+        /* Animasi Hover */
+        transform: translateY(-1px); /* Tombol terangkat sedikit ke atas */
+        box-shadow: 0 4px 10px rgba(0, 202, 255, 0.3); /* Bayangan biru */
+    }
     .btn-primary:active {
       transform: translateY(0);
     }
@@ -876,8 +887,16 @@
                     <label>Tarif Ongkir (Rp)</label>
                     <input id="newOngkir" type="number" placeholder="Contoh: 6000">
                 </div>
-                <div style="align-self:end">
-                    <button id="btnAddOngkir" class="btn btn-primary">Tambah Ongkir</button>
+                
+                <div style="align-self:end; display: flex; gap: 10px; justify-content: flex-end;">
+                    
+                    <a href="cekongkir.html" class="btn btn-secondary">
+                        Hitung Ongkir
+                    </a>
+    
+                    <button id="btnAddOngkir" class="btn btn-primary">
+                        Tambah Ongkir
+                    </button>
                 </div>
             </div>
         </div>
