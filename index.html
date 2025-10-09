@@ -719,27 +719,27 @@
 
     <div id="dashboardTab" class="tabContent">
       <h3>Dashboard Overview</h3>
-      
+        
       <div class="grid grid-3">
         <div class="card">
           <h4>Total Kurir Aktif</h4>
           <div id="totalKurir" style="font-size:32px;font-weight:800;color:var(--primary)">0</div>
           <div class="small">Jumlah kurir dengan status aktif</div>
         </div>
-        
+            
         <div class="card">
           <h4>Nota Hari Ini</h4>
           <div id="notaHariIni" style="font-size:32px;font-weight:800;color:var(--primary)">0</div>
           <div class="small">Nota dibuat hari ini</div>
         </div>
-        
+            
         <div class="card">
-          <h4>Pendapatan Bulan Ini</h4>
-          <div id="pendapatanBulanIni" style="font-size:32px;font-weight:800;color:var(--success)">Rp 0</div>
+          <h4>Pendapatan Hari Ini</h4>
+          <div id="pendapatanHariIni" style="font-size:32px;font-weight:800;color:var(--success)">Rp 0</div>
           <div class="small">Total dari Ongkir + Tambahan</div>
         </div>
       </div>
-      
+        
       <div class="card" style="margin-top:20px">
         <h4>Nota Terbaru</h4>
         <div id="recentNota" class="list-v"></div>
@@ -786,16 +786,11 @@
 
     <div id="notaTab" class="tabContent hidden">
       <h3>Semua Nota System</h3>
-      
       <div class="card">
         <div class="grid grid-3">
           <div>
-            <label>Tanggal Mulai</label>
-            <input id="filterStartDate" type="date">
-          </div>
-          <div>
-            <label>Tanggal Akhir</label>
-            <input id="filterEndDate" type="date">
+            <label>Pilih Tanggal Nota</label>
+            <input id="filterSingleDate" type="date">
           </div>
           <div>
             <label>Kurir</label>
@@ -803,10 +798,11 @@
               <option value="">Semua Kurir</option>
             </select>
           </div>
+          <div style="visibility: hidden;">&nbsp;</div>
         </div>
         <div class="btnbar">
-          <button id="btnFilterNota" class="btn btn-primary">Filter</button>
-          <button id="btnResetFilter" class="btn secondary">Reset</button>
+          <button id="btnFilterNotaNew" class="btn btn-primary">Filter</button>
+          <button id="btnResetFilterNew" class="btn secondary">Reset (Hari Ini)</button>
           <button id="btnExportNota" class="btn secondary">Export CSV</button>
         </div>
       </div>
@@ -1188,7 +1184,15 @@
     const btnLogout = el('btnLogout');
 
     const formatRp = n => "Rp " + (n || 0).toLocaleString("id-ID");
-
+    // Helper untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+    function getTodayDate() {
+        // Menggunakan timezone lokal
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
     const calculatePendapatanNota = (nota) => {
         const ongkir = Number(nota.ongkir) || 0;
         const tambahan = nota.tambahans ? nota.tambahans.reduce((sum, t) => sum + (Number(t.nominal) || 0), 0) : 0;
@@ -1305,7 +1309,17 @@
       
       if (id === 'dashboardTab') loadDashboard();
       if (id === 'kurirTab') loadKurirData();
-      if (id === 'notaTab') loadAllNota();
+      if (id === 'notaTab') {
+          loadKurirOptions();
+          // Tentukan tanggal hari ini untuk dijadikan filter default
+          const today = getTodayDate(); 
+          // Panggil fungsi pemuatan nota dengan filter tanggal hari ini.
+          // Ini akan menampilkan nota hari ini secara default.
+          loadAllNota({ 
+              startDate: today, 
+              endDate: today 
+          });
+      }
       if (id === 'ongkirTab') loadOngkirData();
       if (id === 'testimoniTab') loadTestimoniData();
       if (id === 'laporanTab') initReportTab();
@@ -1424,12 +1438,12 @@
         const selectedDate = trxLogDateFilter.value; // <<< TAMBAH INI (Format: YYYY-MM-DD)
         const selectedKurirId = trxLogKurirFilter.value; // Kurir ID
 
-        const filteredData = allTrxLogData.filter(log => {
-            const monthMatch = !selectedMonth || log.monthYear === selectedMonth;
-            const dateMatch = !selectedDate || log.dateOnly === selectedDate; // <<< TAMBAH INI
-            const kurirMatch = !selectedKurirId || log.kurirId === selectedKurirId;
-            return monthMatch && kurirMatch && dateMatch; // <<< UBAH BAGIAN INI
-        });
+        const filteredData = allTrxLogData.filter(log => {
+            const monthMatch = !selectedMonth || log.monthYear === selectedMonth;
+            const dateMatch = !selectedDate || log.dateOnly === selectedDate; // KONDISI FILTER INI AKAN BERJALAN
+            const kurirMatch = !selectedKurirId || log.kurirId === selectedKurirId;
+            return monthMatch && kurirMatch && dateMatch; // Gabungan ketiga filter
+        });
 
         if (filteredData.length === 0) {
             trxMitraLogList.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">Tidak ada transaksi mitra yang ditemukan untuk filter ini.</td></tr>`;
@@ -1558,11 +1572,20 @@
             if (!trxLogMonthFilter.value) {
                 trxLogMonthFilter.value = new Date().toISOString().slice(0, 7);
             }
-            if (!trxLogDateFilter.value) {
-                trxLogDateFilter.value = ''; 
-            }
-            // Tampilkan hasil yang sudah difilter
-            displayFilteredTrxLog();
+            const today = new Date();
+            // Gunakan metode getFullYear(), getMonth(), dan getDate() perangkat
+            // dan pastikan formatnya YYYY-MM-DD
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Tambah 1 karena bulan dari 0-11
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            const todayDateFormatted = `${year}-${month}-${day}`; // Hasilnya: 2025-10-10
+            
+            // 2. Set nilai default input tanggal ke HARI INI
+            trxLogDateFilter.value = todayDateFormatted; 
+            
+            // Tampilkan hasil yang sudah difilter
+            displayFilteredTrxLog();
 
         } catch (e) {
             console.error("Gagal memuat log TRX mitra:", e);
@@ -1809,7 +1832,7 @@
         
         if (!allNotaSnap.exists()) {
             el('notaHariIni').textContent = 0;
-            el('pendapatanBulanIni').textContent = formatRp(0);
+            el('pendapatanHariIni').textContent = formatRp(0); 
             el('recentNota').innerHTML = '<p class="small">Tidak ada nota terbaru</p>';
             return;
         }
@@ -1817,7 +1840,7 @@
         const today = new Date().toISOString().slice(0, 10);
         const currentMonth = new Date().toISOString().slice(0, 7);
         let notaHariIni = 0;
-        let totalPendapatan = 0;
+        let totalPendapatanHariIni = 0; // Mengubah variabel menjadi Pendapatan Hari Ini
         let recentNota = [];
         
         const allNota = allNotaSnap.val();
@@ -1836,7 +1859,7 @@
         recentNota.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         el('notaHariIni').textContent = notaHariIni;
-        el('pendapatanBulanIni').textContent = formatRp(totalPendapatan);
+        el('pendapatanHariIni').textContent = formatRp(totalPendapatanHariIni); 
         
         el('recentNota').innerHTML = recentNota.length > 0 
           ? recentNota.slice(0, 5).map(nota => `
@@ -2057,66 +2080,104 @@
     el("btnCloseNota").addEventListener('click', () => el("notaModal").classList.add("hidden"));
 
     async function loadAllNota(filters = {}) {
-      try {
-        const notaSnap = await get(ref(db, 'nota'));
-        if (!notaSnap.exists()) {
-          el('allNotaList').innerHTML = '<tr><td colspan="8" class="small">Tidak ada nota</td></tr>';
-          return;
+        // 1. Set default tanggal hari ini pada input HTML baru
+        const singleDateInput = el('filterSingleDate');
+        const today = getTodayDate();
+        
+        // Set nilai input filter, jika filter kosong, gunakan hari ini sebagai default
+        const filterDate = filters.startDate || today; 
+        if (singleDateInput) {
+            singleDateInput.value = filterDate;
         }
         
-        let allNota = [];
-        const notaData = notaSnap.val();
-        Object.keys(notaData).forEach(kurir => {
-          Object.keys(notaData[kurir]).forEach(notaId => {
-            allNota.push({ id: notaId, kurir: kurir, ...notaData[kurir][notaId] });
-          });
-        });
+        // Set kurir filter (jika ada)
+        if (el('filterKurir')) {
+            el('filterKurir').value = filters.kurir || '';
+        }
         
-        const filtered = allNota.filter(nota => {
-            const date = nota.createdAt ? nota.createdAt.slice(0, 10) : '';
-            return (!filters.startDate || date >= filters.startDate) &&
-                   (!filters.endDate || date <= filters.endDate) &&
-                   (!filters.kurir || nota.kurir === filters.kurir);
-        });
-
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Tampilkan loading state
+        el('allNotaList').innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 20px;">Memuat data...</td></tr>';
         
-        const totalTambahan = (tambahans) => {
-            if (!tambahans) return 0;
-            return tambahans.reduce((sum, t) => sum + Number(t.nominal || 0), 0);
-        };
-        
-        el('allNotaList').innerHTML = filtered.length > 0 ? filtered.map(nota => `
-          <tr>
-            <td>${nota.noNota || ''}</td>
-            <td>${nota.kurir || ''}</td>
-            <td>${nota.createdAt ? new Date(nota.createdAt).toLocaleDateString('id-ID') : '-'}</td>
-            <td>${formatRp(nota.ongkir)}</td>
-            <td>${formatRp(totalTambahan(nota.tambahans))}</td>
-            <td>${formatRp(calculatePendapatanNota(nota))}</td>
-            <td>${nota.items ? nota.items.length : 0}</td>
-            <td>
-              <button class="btn secondary mini-btn" onclick="window.app.viewNotaDetail('${nota.kurir}', '${nota.id}')">Lihat</button>
-              <button class="btn danger mini-btn" onclick="window.app.deleteNota('${nota.kurir}', '${nota.id}', '${nota.noNota}')">Hapus</button>
-            </td>
-          </tr>
-        `).join('') : '<tr><td colspan="8" class="small">Tidak ada nota yang sesuai filter</td></tr>';
-        
-      } catch (error) {
-        console.error("Error loading all nota:", error);
-      }
+        try {
+            // Karena struktur DB Anda berdasarkan Kurir, kita tetap ambil semua lalu filter di client
+            const notaSnap = await get(ref(db, 'nota'));
+            if (!notaSnap.exists()) {
+              el('allNotaList').innerHTML = '<tr><td colspan="8" class="small">Tidak ada nota</td></tr>';
+              return;
+            }
+            
+            let allNota = [];
+            const notaData = notaSnap.val();
+            Object.keys(notaData).forEach(kurir => {
+              Object.keys(notaData[kurir]).forEach(notaId => {
+                // Catatan: Asumsi properti tanggal di nota adalah 'createdAt'
+                allNota.push({ id: notaId, kurir: kurir, ...notaData[kurir][notaId] });
+              });
+            });
+            
+            // 2. Logika Filtering Baru (hanya menggunakan filterDate yang tunggal)
+            const filtered = allNota.filter(nota => {
+                const date = nota.createdAt ? nota.createdAt.slice(0, 10) : '';
+                
+                // Filter hanya berdasarkan tanggal tunggal (filterDate)
+                const dateMatch = !filterDate || date === filterDate;
+                
+                // Filter berdasarkan kurir
+                const kurirMatch = !filters.kurir || nota.kurir === filters.kurir;
+                
+                return dateMatch && kurirMatch;
+            });
+    
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            const totalTambahan = (tambahans) => {
+                if (!tambahans) return 0;
+                return tambahans.reduce((sum, t) => sum + Number(t.nominal || 0), 0);
+            };
+            
+            el('allNotaList').innerHTML = filtered.length > 0 ? filtered.map(nota => `
+              <tr>
+                <td>${nota.noNota || ''}</td>
+                <td>${nota.kurir || ''}</td>
+                <td>${nota.createdAt ? new Date(nota.createdAt).toLocaleDateString('id-ID') : '-'}</td>
+                <td>${formatRp(nota.ongkir)}</td>
+                <td>${formatRp(totalTambahan(nota.tambahans))}</td>
+                <td>${formatRp(calculatePendapatanNota(nota))}</td>
+                <td>${nota.items ? nota.items.length : 0}</td>
+                <td>
+                  <button class="btn secondary mini-btn" onclick="window.app.viewNotaDetail('${nota.kurir}', '${nota.id}')">Lihat</button>
+                  <button class="btn danger mini-btn" onclick="window.app.deleteNota('${nota.kurir}', '${nota.id}', '${nota.noNota}')">Hapus</button>
+                </td>
+              </tr>
+            `).join('') : `<tr><td colspan="9" class="small">Tidak ada nota pada tanggal ${new Date(filterDate).toLocaleDateString('id-ID')}</td></tr>`;
+            
+        } catch (error) {
+            console.error("Error loading all nota:", error);
+            el('allNotaList').innerHTML = '<tr><td colspan="9" class="small error">Gagal memuat data nota</td></tr>';
+        }
     }
-
-    el('btnFilterNota').addEventListener('click', () => loadAllNota({
-        startDate: el('filterStartDate').value,
-        endDate: el('filterEndDate').value,
-        kurir: el('filterKurir').value
-    }));
-    el('btnResetFilter').addEventListener('click', () => {
-      el('filterStartDate').value = '';
-      el('filterEndDate').value = '';
-      el('filterKurir').value = '';
-      loadAllNota();
+    // Listener untuk tombol Filter Baru
+    el('btnFilterNotaNew').addEventListener('click', () => {
+        const filterDate = el('filterSingleDate').value;
+        const filterKurir = el('filterKurir').value;
+        
+        if (!filterDate) {
+            alert("Harap pilih tanggal filter!");
+            return;
+        }
+        
+        // Panggil loadAllNota dengan filter tanggal tunggal
+        loadAllNota({
+            startDate: filterDate, 
+            endDate: filterDate, // Gunakan tanggal yang sama untuk Start dan End
+            kurir: filterKurir
+        });
+    });
+    
+    // Listener untuk tombol Reset Baru
+    el('btnResetFilterNew').addEventListener('click', () => {
+        // Muat nota hari ini sebagai default
+        loadAllNota({ startDate: getTodayDate(), endDate: getTodayDate() });
     });
 
     el('btnExportNota').addEventListener('click', async () => {
@@ -2425,7 +2486,7 @@
                     <td>
                         <button class="btn ${isPublished ? 'secondary' : 'success'} mini-btn" onclick="window.app.toggleTestimoniStatus('${item.id}', ${!isPublished})">
                             ${isPublished ? 'Sembunyikan' : 'Tampilkan'}
-                        </button>
+                        <button class=\"btn danger mini-btn\" onclick=\"window.app.deleteTestimoni('${item.id}')\">\n                            Hapus\n                        </button>
                     </td>
                 </tr>
             `}).join('');
@@ -2435,6 +2496,28 @@
             el('testimoniList').innerHTML = '<tr><td colspan="7" class="small error">Gagal memuat data</td></tr>';
         }
     }
+    window.app.deleteTestimoni = async (testimoniId) => {
+        const confirmed = confirm('Apakah Anda yakin ingin menghapus testimoni ini secara permanen?');
+        
+        if (!confirmed) {
+            return; 
+        }
+    
+        try {
+            // Asumsi menggunakan Firebase Realtime Database
+            const testimoniRef = ref(db, `testimoni/${testimoniId}`);
+            await remove(testimoniRef); 
+            
+            alert('Testimoni berhasil dihapus.');
+            
+            // Muat ulang data
+            loadTestimoniData(); 
+            
+        } catch (error) {
+            console.error("Gagal menghapus testimoni:", error);
+            alert('Gagal menghapus testimoni. Silakan coba lagi.');
+        }
+    };
 </script>
 </body>
 </html>
