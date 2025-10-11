@@ -1820,62 +1820,94 @@
     el('searchMitra').addEventListener('keyup', filterMitraTable);
 
     async function loadDashboard() {
-      try {
-        const [kurirSnap, allNotaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
-        
-        let totalKurirAktif = 0;
-        if (kurirSnap.exists()) {
-            const kurirData = kurirSnap.val();
-            totalKurirAktif = Object.values(kurirData).filter(k => k.enabled === true).length;
-        }
-        el('totalKurir').textContent = totalKurirAktif;
-        
-        if (!allNotaSnap.exists()) {
-            el('notaHariIni').textContent = 0;
-            el('pendapatanHariIni').textContent = formatRp(0); 
-            el('recentNota').innerHTML = '<p class="small">Tidak ada nota terbaru</p>';
-            return;
-        }
-
-        const today = new Date().toISOString().slice(0, 10);
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        let notaHariIni = 0;
-        let totalPendapatanHariIni = 0; // Mengubah variabel menjadi Pendapatan Hari Ini
-        let recentNota = [];
-        
-        const allNota = allNotaSnap.val();
-        Object.keys(allNota).forEach(kurir => {
-            Object.values(allNota[kurir]).forEach(nota => {
-                if (nota.createdAt) {
-                    if (nota.createdAt.startsWith(today)) notaHariIni++;
-                    if (nota.createdAt.startsWith(currentMonth)) {
-                        totalPendapatan += calculatePendapatanNota(nota);
+        try {
+            const [kurirSnap, allNotaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
+    
+            // 1. Total Kurir Aktif
+            let totalKurirAktif = 0;
+            if (kurirSnap.exists()) {
+                const kurirData = kurirSnap.val();
+                // Asumsi: Kurir aktif jika 'enabled' = true
+                totalKurirAktif = Object.values(kurirData).filter(k => k.enabled === true).length;
+            }
+            el('totalKurir').textContent = totalKurirAktif;
+    
+            if (!allNotaSnap.exists()) {
+                el('notaHariIni').textContent = 0;
+                el('pendapatanHariIni').textContent = formatRp(0);
+                el('recentNota').innerHTML = '<p class="small">Tidak ada nota terbaru</p>';
+                return;
+            }
+    
+            // Tanggal Hari Ini (YYYY-MM-DD, cocok dengan format nota.createdAt)
+            const today = new Date().toISOString().slice(0, 10);
+            
+            let notaHariIni = 0;
+            let totalPendapatanHariIni = 0; // Variabel ini yang akan diisi dengan pendapatan hari ini
+            let recentNota = [];
+    
+            const allNota = allNotaSnap.val();
+            
+            // Asumsi struktur 'nota': nota/{kurirUsername}/{notaId}
+            Object.keys(allNota).forEach(kurirUsername => {
+                Object.values(allNota[kurirUsername]).forEach(nota => {
+                    
+                    // Pastikan nota memiliki timestamp
+                    if (nota.createdAt) {
+                        
+                        const notaDate = nota.createdAt.slice(0, 10); // Ambil hanya bagian tanggal
+                        
+                        // 2. Hitung Nota Hari Ini dan Pendapatan Hari Ini
+                        if (notaDate === today) {
+                            notaHariIni++;
+                            // Menggunakan fungsi helper Anda untuk menghitung pendapatan nota
+                            totalPendapatanHariIni += calculatePendapatanNota(nota); 
+                        }
+                    
+                        // Kumpulkan semua nota untuk riwayat terbaru
+                        recentNota.push({ ...nota, kurir: kurirUsername });
                     }
-                }
-                recentNota.push({ ...nota, kurir });
+                });
             });
-        });
-        
-        recentNota.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        el('notaHariIni').textContent = notaHariIni;
-        el('pendapatanHariIni').textContent = formatRp(totalPendapatanHariIni); 
-        
-        el('recentNota').innerHTML = recentNota.length > 0 
-          ? recentNota.slice(0, 5).map(nota => `
-            <div class="card" style="padding:12px;">
-              <div><strong>No: ${nota.noNota || '-'}</strong> - ${nota.kurir}</div>
-              <div>${new Date(nota.createdAt).toLocaleString('id-ID')}</div>
-              <div>Total: ${formatRp(nota.total)}</div>
-            </div>
-          `).join('')
-          : '<p class="small">Tidak ada nota terbaru</p>';
-        
-      } catch (error) {
-        console.error("Error loading dashboard:", error);
-      }
+    
+            // Tampilkan hasil harian
+            el('notaHariIni').textContent = notaHariIni;
+            el('pendapatanHariIni').textContent = formatRp(totalPendapatanHariIni); // Sudah terisi dengan data hari ini
+    
+            // 3. Nota Terbaru (Diurutkan & Dibatasi 10 Baris)
+            
+            // Urutkan nota berdasarkan waktu masuknya (createdAt, descending/terbaru)
+            recentNota.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+            el('recentNota').innerHTML = recentNota.length > 0
+                // Ambil 10 nota terbaru
+                ? recentNota.slice(0, 10).map(nota => { 
+                    const notaTime = new Date(nota.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    // Asumsi: field 'total' di nota adalah total pembayaran (pendapatan + ongkir)
+                    const totalBayar = nota.total || calculatePendapatanNota(nota); 
+                    
+                    return `
+                        <div class="card" style="padding:12px; border-left: 3px solid var(--primary); margin-bottom: 5px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="font-size: 14px;">No: ${nota.noNota || 'N/A'}</strong> <span class="small" style="margin-left: 10px;">(${notaTime})</span>
+                                </div>
+                            </div>
+                            <div class="small">Kurir: ${nota.kurir} - Total: ${formatRp(totalBayar)}</div>
+                        </div>
+                    `;
+                }).join('')
+                : '<p class="small" style="text-align: center; padding: 10px;">Tidak ada nota terbaru</p>';
+    
+        } catch (error) {
+            console.error("Error loading dashboard:", error);
+            // Tampilkan pesan error pada dashboard
+            el('totalKurir').textContent = 'ERR';
+            el('notaHariIni').textContent = 'ERR';
+            el('pendapatanHariIni').textContent = formatRp(0);
+            el('recentNota').innerHTML = '<p class="small error" style="text-align: center;">Gagal memuat data dashboard.</p>';
+        }
     }
-
     async function loadKurirData() {
       try {
         const [kurirSnap, notaSnap] = await Promise.all([get(ref(db, 'kurir')), get(ref(db, 'nota'))]);
