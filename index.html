@@ -40,8 +40,25 @@
       padding: 20px;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      font-size: 14px; /* Sedikit dikecilkan */
+      line-height: 1.5;
     }
-
+    .container {
+        padding: 20px; /* Padding kontainer dikurangi */
+        max-width: 1200px; /* Batasan lebar untuk fokus */
+        margin: 0 auto;
+    }
+    
+    h3 {
+        font-size: 1.5em; /* Tetap jelas, tapi tidak terlalu besar */
+        margin-bottom: 20px;
+        color: var(--text-primary);
+    }
+    
+    .adminPanel {
+        /* Pastikan ada padding atas untuk tombol toggle */
+        padding-top: 80px; 
+    }
     .login-container {
       width: 100%;
       max-width: 420px;
@@ -262,21 +279,63 @@
       padding: 16px 20px;
       display: none;
     }
-
     .card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 24px 28px;
-      box-shadow: 0 12px 30px var(--shadow-light);
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-      transition: box-shadow 0.3s ease;
+        /* Ukuran & Padding Compact */
+        padding: 18px; 
+        border-radius: 16px; /* Sudut lebih melengkung */
+        
+        /* Desain Modern */
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05); /* Shadow lebih lembut */
+        margin-bottom: 15px; /* Jarak antar card dikurangi */
+        
+        /* Animasi Hover/Click */
+        transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
-
+    
     .card:hover {
-      box-shadow: 0 16px 40px var(--shadow-strong);
+        transform: translateY(-2px); /* Efek melayang saat di-hover */
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
     }
-
+    .card h4 {
+        font-size: 1em; 
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--secondary);
+    }
+    
+    /* Grid Compact */
+    .grid {
+        display: grid;
+        gap: 15px; /* Jarak antar kolom dikurangi */
+    }
+    
+    /* Card pada Dashboard (Efek Skala) */
+    .grid-3 .card {
+        transition: transform 0.3s ease-out;
+    }
+    .grid-3 .card:hover {
+        transform: scale(1.03); /* Sedikit membesar saat di-hover */
+    }
+    
+    /* --- TAB CONTENT ANIMATION (Wajib ada) --- */
+    /* Animasi Transisi Saat Ganti Tab */
+    .tabContent {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+    
+    .tabContent.hidden {
+        display: block !important; /* Agar animasi berjalan, jangan langsung display: none */
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none; /* Pastikan tidak bisa diinteraksi */
+        position: absolute; /* Posisikan di luar layar agar tidak mengganggu */
+        width: 100%;
+    }
     h2, h3 {
       margin: 8px 0 16px 0;
       color: var(--primary);
@@ -287,7 +346,7 @@
     #btnLogout {
       position: fixed;
       top: 20px;
-      right: 20px;
+      right: 30px;
       padding: 8px 14px;
       font-size: 0.85rem;
       border-radius: 20px;
@@ -298,7 +357,7 @@
       font-weight: bold;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       transition: all 0.3s ease;
-      z-index: 1000;
+      z-index: 1001;
     }
 
     #btnLogout:hover {
@@ -361,32 +420,147 @@
     .btn.full {
       width: 100%;
     }
-
+    /* --- PENYESUAIAN TINGGI MENU AGAR HANYA 4 ITEM TERLIHAT --- */
     nav.tab {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      display: none;
+      flex-direction: column;
+      position: fixed; /* Tetap fixed agar ikut scroll */
+      top: 65px; 
+      left: 30px; 
+      z-index: 1000; 
+      
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 20px; 
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      min-width: 220px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    
+      /* PENTING: Batasan tinggi yang hanya menampilkan sekitar 4 item */
+      max-height: 180px; /* Nilai sekitar 140px-150px akan menampilkan 4 item */
+      overflow-y: auto; /* Memastikan scrollbar muncul */
+    
+      /* Animasi Masuk/Keluar */
+      opacity: 0;
+      transform: translateY(-10px) scale(0.98);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
-
+    
+    /* Tampilkan dengan Animasi */
+    nav.tab.open {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    /* Gaya Tombol dalam Dropdown */
     nav.tab button {
-      padding: 14px 0;
-      border-radius: 16px;
-      border: 1.5px solid var(--border);
-      background: var(--card-bg);
+      width: 100%;
+      text-align: left;
+      padding: 12px 18px; /* Padding sedikit diperbesar */
+      border-radius: 15px; /* Sudut tombol lebih melengkung */
+      background: none;
+      border: none;
+      margin: 2px 0;
       color: var(--text-primary);
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.02em;
-      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.1s;
     }
-
+    
+    nav.tab button:hover:not(.active) {
+      background: rgba(0, 0, 0, 0.05); /* Hover lembut */
+      transform: translateX(3px); /* Sedikit efek geser saat dihover */
+    }
+    
     nav.tab button.active {
       background: linear-gradient(90deg, var(--primary), var(--primary-light));
       color: white;
-      border-color: transparent;
-      box-shadow: 0 8px 24px var(--shadow-light);
+      box-shadow: 0 4px 10px var(--shadow-light);
+    }
+    /* --- CSS Khusus untuk Tombol Sembunyikan (Agar warnanya JELAS beda dari Hapus Permanen) --- */
+    .btn-sembunyikan {
+        background-color: #ffc107; 
+        border-color: #ffc107;
+        /* Gunakan warna teks yang gelap agar kontras di atas kuning */
+        color: #343a40 !important; /* Gunakan !important jika teksnya tetap putih */
+    }
+    
+    /* Efek hover untuk tombol Sembunyikan */
+    .btn-sembunyikan:hover {
+        background-color: #e0a800; 
+        border-color: #e0a800;
+    }
+    
+    /* Optional: Untuk memastikan tombol rapat dan kecil */
+    .mini-btn {
+        padding: 4px 8px; /* Contoh ukuran kecil */
+        font-size: 12px;
+    }
+    td button.mini-btn:not(:last-child) {
+        margin-right: 4px; 
+    }
+    
+    /* Optional: Pastikan tombol HAPUS PERMANEN tetap merah tua */
+    .btn.danger {
+        background-color: #dc3545; /* Merah standar/Bootstrap */
+        border-color: #dc3545;
+        color: white;
+    }    
+    /* Styling Scrollbar (Opsional: Agar scrollbar terlihat modern/minimalis) */
+    nav.tab::-webkit-scrollbar {
+      width: 6px;
+    }
+    nav.tab::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+    }
+    
+    .menu-toggle-btn {
+      position: fixed;
+      top: 20px; 
+      left: 30px; 
+      background: var(--primary);
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 4px 15px var(--shadow-light);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .menu-toggle-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    /* Gaya Tombol dalam Dropdown */
+    nav.tab button {
+      width: 100%;
+      text-align: left;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: none;
+      border: none;
+      margin: 2px 0;
+      color: var(--text-primary);
+      transition: background 0.2s;
+    }
+    
+    nav.tab button:hover:not(.active) {
+      background: #f0f4f9; /* Latar belakang saat di-hover */
+    }
+    
+    nav.tab button.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: none;
+    }
+    
+    /* Pastikan konten utama diberi margin agar tidak tertutup tombol toggle */
+    .adminPanel {
+        padding-top: 80px; /* Tambah ruang di atas agar tombol toggle aman */
     }
 
     .hidden {
@@ -463,10 +637,11 @@
       margin-top: 16px;
       overflow-x: auto;
       display: block;
+      font-size: 0.9em;
     }
 
     .admin-table th, .admin-table td {
-      padding: 12px 16px;
+      padding: 8px 10px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
@@ -477,7 +652,12 @@
       color: white;
       font-weight: 700;
     }
-
+    .admin-table tr {
+        transition: background-color 0.3s ease;
+    }
+    .admin-table tbody tr:hover {
+        background-color: #f7f9fc;
+    }
     .admin-table tr:hover {
       background-color: rgba(0, 202, 255, 0.05);
     }
@@ -656,7 +836,57 @@
     .filter-controls label {
         margin-bottom: 0;
     }
+    /* --- GAYA ICON SVG --- */
+    .nav-icon {
+        width: 20px;            /* Ukuran ikon */
+        height: 20px;
+        margin-right: 10px;     /* Jarak ke teks */
+        flex-shrink: 0;         /* Penting: mencegah ikon menyusut */
+        
+        /* Gaya Garis (Outline) */
+        stroke: var(--text-primary); 
+        stroke-width: 2;
+        fill: none;
+        transition: stroke 0.2s ease;
+    }
     
+    /* --- PENYESUAIAN TOMBOL MENU (Agar Ikon Berada di Kiri) --- */
+    nav.tab button {
+      width: 100%;
+      padding: 12px 18px; 
+      border-radius: 15px; 
+      background: none;
+      border: none;
+      margin: 2px 0;
+      color: var(--text-primary);
+      
+      /* PENTING: Untuk menata ikon dan teks */
+      display: flex;            
+      align-items: center;
+      text-align: left;
+      
+      transition: background 0.2s ease, color 0.2s ease, transform 0.1s;
+    }
+    
+    
+    /* --- Efek Warna saat Tombol Hover dan Aktif --- */
+    
+    /* Warna Ikon saat di-hover */
+    nav.tab button:hover:not(.active) .nav-icon {
+        stroke: var(--primary); /* Ikon berubah warna saat hover */
+    }
+    
+    /* Warna Ikon saat Tombol AKTIF */
+    nav.tab button.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: white; /* Warna teks tombol aktif putih */
+      box-shadow: 0 4px 10px var(--shadow-light);
+    }
+    
+    /* Ikon SVG di dalam Tombol AKTIF harus berwarna putih */
+    nav.tab button.active .nav-icon {
+        stroke: white; 
+    }    
   </style>
 </head>
 <body>
@@ -691,32 +921,52 @@
       &copy; 2025 Sahabatku Delivery • <a href="#">Butuh bantuan?</a>
     </div>
   </div>
-
-  <div class="container" id="adminPanel">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div>
-          <h2>Admin 👑<span id= style="color:#0b4870;font-weight:800"></span></h2>
-          <div class="small">Manajemen Kurir • Monitoring Nota • Laporan Keuangan</div>
-        </div>
-        <button id="btnLogout" class="btn danger">Logout</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <nav class="tab" id="adminTabNav">
-        <button data-tab="dashboardTab" class="active">📊 Dashboard</button>
-        <button data-tab="kurirTab">👥 Kurir</button>
-        <button data-tab="notaTab">📋 Nota</button>
-        <button data-tab="ongkirTab">🚚 Ongkir</button>
-        <button data-tab="testimoniTab">⭐ Testimoni</button>
-        <button data-tab="mitraTab">🏢 Mitra</button>
-        <button data-tab="laporanTab">📈 Laporan</button>
-        <button onclick="window.location.href='absensi-kurir-sahabatku.html'">✅ Absensi Kurir</button>
-        <button data-tab="settingsTab">⚙️ Pengaturan</button>
+  <div class="container" id="adminPanel" style="display: none;">
+      <button class="menu-toggle-btn" id="menuToggleButton">
+          ☰ Menu Navigasi
+      </button>
+      
+      <button id="btnLogout" class="btn danger">Logout</button>
+      
+          <nav class="tab" id="adminTabNav">
+                <button data-tab="dashboardTab" class="active">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                      Dashboard
+                  </button>
+                <button data-tab="kurirTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><circle cx="12" cy="7" r="4"/><path d="M10 17v3H4v-3c0-2 2-3 4-3h4c2 0 4 1 4 3v3h-6"/></svg>
+                      Kurir
+                  </button>
+                <button data-tab="notaTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 15h8M8 11h8"/></svg>
+                      Nota
+                  </button>
+                <button data-tab="ongkirTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M10 21v-7h4v7M12 14v7M2 8h20M5 8V4h4M19 8V4h-4M12 2v2M2 12h2M20 12h2"/></svg>
+                      Ongkir
+                  </button>
+                <button data-tab="testimoniTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 1l3 7h7l-6 4 3 7-6-4-6 4 3-7-6-4h7z"/></svg>
+                      Testimoni
+                  </button>
+                <button data-tab="mitraTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M22 10s-3 3-5 5L8 9l5-5c2 2 5-3 5-3m-6 4L9 8 3 14l5 6 6-5z"/></svg>
+                      Mitra
+                  </button>
+                <button data-tab="laporanTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M18 20V6H6v14m12 0H6M4 22h16M12 18V6"/></svg>
+                      Laporan
+                  </button>
+                <button onclick="window.location.href='absensi-kurir-sahabatku.html'">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM12 10v4M15 12h-6"/></svg>
+                      Absensi Kurir
+                  </button>
+                <button data-tab="settingsTab">
+                      <svg viewBox="0 0 24 24" class="nav-icon"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 20.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V12h.09a1.65 1.65 0 0 0 1.51 1z"/></svg>
+                      Pengaturan
+                  </button>
       </nav>
-    </div>
-
+      </nav>
     <div id="dashboardTab" class="tabContent">
       <h3>Dashboard Overview</h3>
         
@@ -1526,6 +1776,23 @@
             alert("Gagal menghapus log transaksi: " + error.message);
         }
     }
+    const deleteMitra = async (mitraId) => {
+        if (confirm("🚨 PERINGATAN: Yakin ingin MENGHAPUS PERMANEN mitra ini? Aksi ini tidak dapat dibatalkan dan akan menghapus semua data transaksi mitra terkait.")) {
+            try {
+                // Hapus data mitra utama
+                await remove(ref(db, `mitra/${mitraId}`));
+                // Hapus data transaksi bulanan terkait
+                await remove(ref(db, `mitra_trx_monthly/${mitraId}`));
+                await remove(ref(db, `mitra_status_monthly/${mitraId}`));
+    
+                alert('Mitra berhasil dihapus secara permanen!');
+                loadMitraData(); // Muat ulang data tabel
+            } catch (e) {
+                console.error("Error deleting mitra permanently: ", e);
+                alert('Gagal menghapus mitra secara permanen.');
+            }
+        }
+    };
     const loadMitraTrxLog = async () => {
         trxMitraLogArea.classList.remove('hidden');
         trxMitraLogList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Memuat data...</td></tr>';
@@ -1625,21 +1892,6 @@
             alert('Gagal mengubah TRX.');
         }
     };
-
-    const deleteMitra = async (mitraId, mitraName) => {
-        if (!confirm(`Yakin ingin menghapus mitra "${mitraName}"? Ini akan menghapus semua data dan riwayat transaksi mitra ini secara permanen.`)) return;
-    
-        try {
-            await remove(ref(db, `mitra/${mitraId}`));
-            await remove(ref(db, `mitra_trx_monthly/${mitraId}`));
-            alert('Mitra berhasil dihapus!');
-            loadMitraData();
-        } catch (e) {
-            console.error("Error deleting mitra: ", e);
-            alert('Gagal menghapus mitra.');
-        }
-    };
-
     const deleteMitraForMonth = async (mitraId, mitraName) => {
         const selectedMonth = monthFilter.value;
         if (!confirm(`Yakin ingin menyembunyikan mitra "${mitraName}" untuk bulan ${selectedMonth}? Mitra akan tetap ada di bulan lainnya.`)) return;
@@ -1758,8 +2010,9 @@
                                 <td>${new Intl.NumberFormat('id-ID').format(mitra.targetTransaksi || 0)}</td>
                                 <td>${currentTrx}</td>
                                 <td>
-                                    <button class="btn secondary mini-btn" onclick="window.app.editMitra('${mitra.id}')">Edit</button>
-                                    <button class="btn danger mini-btn" onclick="window.app.deleteMitraForMonth('${mitra.id}', '${namaMitra}')">Sembunyikan</button>
+                                    <button class="btn secondary mini-btn" onclick="window.app.editMitra('${mitra.id}')">Edit</button> 
+                                    <button class="btn danger mini-btn" onclick="window.app.deleteMitra('${mitra.id}')">Hapus</button> 
+                                    <button class="btn btn-sembunyikan mini-btn" onclick="window.app.deleteMitraForMonth('${mitra.id}', '${namaMitra}')">Sembunyikan</button>
                                 </td>
                             </tr>`;
                         }).join('');
@@ -2104,8 +2357,8 @@
             }
         },
         editMitra: editMitra,
-        deleteMitra: deleteMitra,
         deleteMitraForMonth: deleteMitraForMonth,
+        deleteMitra: deleteMitra,
     };
     window.app = appFunctions; 
     
@@ -2550,6 +2803,33 @@
             alert('Gagal menghapus testimoni. Silakan coba lagi.');
         }
     };
+    /* --- LOGIKA JAVASCRIPT UNTUK TOGGLE MENU --- */
+    document.addEventListener('DOMContentLoaded', () => {
+        const navMenu = document.getElementById('adminTabNav');
+        const toggleButton = document.getElementById('menuToggleButton');
+        const tabButtons = navMenu.querySelectorAll('button');
+    
+        // 1. Fungsi Toggle Menu (Buka/Tutup)
+        toggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navMenu.classList.toggle('open');
+        });
+    
+        // 2. Fungsi Tutup Menu Saat Klik di Luar (Wajib untuk dropdown!)
+        document.addEventListener('click', (e) => {
+            // Jika yang diklik BUKAN tombol toggle dan BUKAN di dalam menu, maka tutup
+            if (!navMenu.contains(e.target) && e.target !== toggleButton && navMenu.classList.contains('open')) {
+                navMenu.classList.remove('open');
+            }
+        });
+        
+        // 3. Tambahkan fungsi untuk menutup menu setelah memilih tab
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navMenu.classList.remove('open');
+            });
+        });
+    });
 </script>
 </body>
 </html>
